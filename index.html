@@ -1,929 +1,299 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeCurrency (DC) 代币管理系统</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
-    <style>
-        :root {
-            --primary-color: #2C5AA0;
-            --secondary-color: #4A6FA5;
-            --success-color: #28A745;
-            --warning-color: #FFC107;
-            --danger-color: #DC3545;
-            --light-color: #F8F9FA;
-            --dark-color: #343A40;
-            --border-color: #E1E5EB;
-            --shadow-light: 0 2px 12px rgba(0, 0, 0, 0.08);
-            --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.1);
-            --border-radius: 8px;
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', 'Segoe UI', 'PingFang SC', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            padding: 30px 0;
-            margin-bottom: 30px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .header h1 {
-            color: var(--primary-color);
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            letter-spacing: -0.5px;
-        }
-
-        .header p {
-            color: var(--secondary-color);
-            font-size: 1.1rem;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .contract-info {
-            background: white;
-            padding: 20px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-light);
-            margin-bottom: 30px;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .contract-info h3 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-            font-size: 1.2rem;
-        }
-
-        .contract-address {
-            display: inline-block;
-            background: var(--light-color);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 0.9rem;
-            color: var(--dark-color);
-            margin-top: 5px;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-light);
-            margin-bottom: 25px;
-            transition: var(--transition);
-            border: 1px solid var(--border-color);
-        }
-
-        .card:hover {
-            box-shadow: var(--shadow-medium);
-            transform: translateY(-2px);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .card-number {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            background: var(--primary-color);
-            color: white;
-            border-radius: 50%;
-            font-weight: 600;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-
-        .card-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--dark-color);
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: var(--border-radius);
-            font-family: inherit;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-primary { background: var(--primary-color); color: white; }
-        .btn-primary:hover { background: #234580; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(44, 90, 160, 0.3); }
-
-        .btn-success { background: var(--success-color); color: white; }
-        .btn-success:hover { background: #218838; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3); }
-
-        .btn-warning { background: var(--warning-color); color: var(--dark-color); }
-        .btn-warning:hover { background: #e0a800; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3); }
-
-        .btn-danger { background: var(--danger-color); color: white; }
-        .btn-danger:hover { background: #c82333; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3); }
-
-        .btn:disabled {
-            background: #CCCCCC;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--dark-color);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            font-family: inherit;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
-        }
-
-        .info-box {
-            background: #F0F7FF;
-            padding: 20px;
-            border-radius: var(--border-radius);
-            border-left: 4px solid var(--primary-color);
-            margin-top: 20px;
-        }
-
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .info-item:last-child {
-            border-bottom: none;
-        }
-
-        .info-label {
-            font-weight: 500;
-            color: var(--secondary-color);
-        }
-
-        .info-value {
-            font-weight: 600;
-            color: var(--dark-color);
-        }
-
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .status-connected {
-            background: rgba(40, 167, 69, 0.1);
-            color: var(--success-color);
-        }
-
-        .status-disconnected {
-            background: rgba(220, 53, 69, 0.1);
-            color: var(--danger-color);
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-
-        .applicant-card {
-            background: var(--light-color);
-            padding: 20px;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--border-color);
-        }
-
-        .applicant-address {
-            font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 0.9rem;
-            color: var(--dark-color);
-            word-break: break-all;
-            margin: 10px 0;
-        }
-
-        .vote-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .alert {
-            padding: 15px;
-            border-radius: var(--border-radius);
-            margin: 15px 0;
-            font-weight: 500;
-        }
-
-        .alert-info {
-            background: #E7F3FF;
-            color: var(--primary-color);
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .alert-warning {
-            background: #FFF3CD;
-            color: #856404;
-            border-left: 4px solid var(--warning-color);
-        }
-
-        .alert-success {
-            background: #D4EDDA;
-            color: #155724;
-            border-left: 4px solid var(--success-color);
-        }
-
-        .alert-danger {
-            background: #F8D7DA;
-            color: #721C24;
-            border-left: 4px solid var(--danger-color);
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
-            color: var(--secondary-color);
-            font-size: 0.9rem;
-        }
-
-        .timer {
-            font-family: 'Monaco', 'Consolas', monospace;
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: var(--danger-color);
-            padding: 5px 10px;
-            background: rgba(220, 53, 69, 0.1);
-            border-radius: 4px;
-            display: inline-block;
-            margin-top: 10px;
-        }
-
-        .claim-status {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: var(--border-radius);
-            font-weight: 500;
-        }
-
-        .claim-available {
-            background: rgba(40, 167, 69, 0.1);
-            color: var(--success-color);
-            border-left: 4px solid var(--success-color);
-        }
-
-        .claim-waiting {
-            background: rgba(255, 193, 7, 0.1);
-            color: #856404;
-            border-left: 4px solid var(--warning-color);
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 8px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-            .container { padding: 0 10px; }
-            .header h1 { font-size: 2rem; }
-            .grid { grid-template-columns: 1fr; }
-            .btn { width: 100%; }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>DeCurrency · 民主货币 / 个人主权货币</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --panel: #11162a;
+      --text: #e6e9f2;
+      --muted: #9aa3c7;
+      --accent: #4da3ff;
+      --border: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: radial-gradient(1200px 600px at 70% -10%, #1a235a33, transparent), var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(11,15,26,0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      max-width: 1200px;
+      margin: auto;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+    .tabs button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 14px;
+      margin-left: 16px;
+      cursor: pointer;
+    }
+    .tabs button.active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 64px 24px;
+    }
+    section {
+      display: none;
+      animation: fade 0.4s ease;
+    }
+    section.active { display: block; }
+    @keyframes fade { from {opacity:0; transform: translateY(10px);} to {opacity:1;} }
+    h1 { font-size: 48px; margin-bottom: 16px; }
+    h2 { font-size: 28px; margin-top: 56px; }
+    h3 { font-size: 20px; margin-top: 32px; }
+    p { color: var(--muted); }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    .card {
+      background: linear-gradient(180deg, #151b3a, var(--panel));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 24px;
+    }
+    code, pre {
+      background: #0d1224;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: block;
+      color: #cfe1ff;
+      overflow-x: auto;
+    }
+    footer {
+      border-top: 1px solid var(--border);
+      margin-top: 80px;
+      padding: 32px 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      h1 { font-size: 36px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>DeCurrency (DC) 去中心化个人主权代币</h1>
-            <p>基于Polygon网络的去中心化身份验证与代币治理平台</p>
-        </header>
+  <div class="bannerWrap">
+  <canvas id="networkBanner"></canvas>
+  <div class="bannerOverlay">
+    <h1>民主货币 · 个人主权货币</h1>
+    <p>将<strong>货币铸造权</strong>公平赋予每一个<strong>真实的个人</strong></p>
+    <div class="bannerFeatures">
+      <span>一人一身份</span>
+      <span>社区共识验证</span>
+      <span>身份即铸币权</span>
+      <span>全球个人主权共识</span>
+    </div>
+  </div>
+</div>
+<header>
+  <div class="nav">
+    <div class="logo">DeCurrency · DC</div>
+    <div class="tabs">
+      <button class="active" onclick="show('home')">首页</button>
+      <button onclick="show('docs')">使用与治理</button>
+    </div>
+  </div>
+</header>
 
-        <div class="contract-info">
-            <h3>智能合约信息</h3>
-            <p>合约部署于Polygon主网</p>
-            <div class="contract-address">0x8Cb3bA05Efa695799E1cF0A2d2921e2387CbFB2C</div>
-            <p style="margin-top: 15px; color: var(--secondary-color); font-size: 0.95rem;">
-                请确保使用MetaMask钱包并连接至Polygon网络
-            </p>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <div class="card-number">1</div>
-                <h2 class="card-title">钱包连接</h2>
-            </div>
-            <div class="btn-group">
-                <button id="connectBtn" class="btn btn-primary">连接MetaMask钱包</button>
-            </div>
-            <div class="info-box">
-                <div class="info-item">
-                    <span class="info-label">当前账户:</span>
-                    <span id="account" class="info-value">未连接</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">连接状态:</span>
-                    <span id="status" class="status-indicator status-disconnected">未连接</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <div class="card-number">2</div>
-                <h2 class="card-title">账户概览</h2>
-            </div>
-            <div class="btn-group">
-                <button id="loadInfo" class="btn btn-primary">刷新账户信息</button>
-            </div>
-            <div class="info-box">
-                <div class="info-item">
-                    <span class="info-label">DC代币余额:</span>
-                    <span id="balance" class="info-value">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">身份验证状态:</span>
-                    <span id="verified" class="info-value">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">投票者权限:</span>
-                    <span id="voter" class="info-value">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">总供应量 (前200投票者):</span>
-                    <span id="totalSupply" class="info-value">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">上次铸造代币:</span>
-                    <span id="lastClaimTime" class="info-value">-</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-number">3</div>
-                    <h2 class="card-title">铸造代币</h2>
-                </div>
-                <div id="authWarning" class="alert alert-warning" style="display: none;">
-                    注意：铸造代币需要先通过身份验证认证
-                </div>
-                
-                <p style="margin-bottom: 15px; color: var(--secondary-color);">
-                    已验证身份的账户每日可铸造1000 DC代币
-                </p>
-                <button id="claimBtn" class="btn btn-success">铸造代币 (1000 DC)</button>
-                
-                <div id="claimStatus" class="claim-status" style="display: none;"></div>
-                
-                <div id="timerDisplay" style="margin-top: 15px; display: none;">
-                    <p style="margin-bottom: 5px; color: var(--secondary-color); font-weight: 500;">下次可铸造倒计时:</p>
-                    <div id="timer" class="timer">00:00:00</div>
-                </div>
-                
-                <div class="alert alert-info" style="margin-top: 15px;">
-                    铸造规则：1. 必须通过身份验证 2. 距离上次铸造必须超过24小时
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <div class="card-number">4</div>
-                <h2 class="card-title">身份认证申请</h2>
-            </div>
-            <p style="margin-bottom: 20px; color: var(--secondary-color);">
-                申请身份验证需支付5000 DC费用，通过后每日可铸造 1000 DC,可申请成为身份审核验证者
-            </p>
-            <div class="form-group">
-                <label class="form-label">身份验证材料链接</label>
-                <input type="text" id="url" class="form-control" placeholder="YouTube、IPFS或其它证明链接">
-                <small style="color: var(--secondary-color); margin-top: 5px; display: block;">
-                    请提供可公开访问的证明身份的视频或文档链接
-                </small>
-            </div>
-            <button id="applyBtn" class="btn btn-warning">提交认证申请 (5000 DC)</button>
-            <div class="alert alert-info" style="margin-top: 20px;">
-                申请提交后需要获得100票投票决定结果，投票获胜方将获得2000 DC奖励
-            </div>
-        </div>
-
-        <div class="grid">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-number">5</div>
-                    <h2 class="card-title">成为投票者</h2>
-                </div>
-                <p style="margin-bottom: 20px; color: var(--secondary-color);">
-                    已认证身份且满足余额条件的用户可申请成为投票者
-                </p>
-                <button id="bevoterBtn" class="btn btn-primary">申请成为投票者</button>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-number">6</div>
-                    <h2 class="card-title">余额衰减刷新</h2>
-                </div>
-                <p style="margin-bottom: 20px; color: var(--secondary-color);">
-                    DC代币每月自动衰减千分之三，此操作手动触发衰减检查
-                </p>
-                <button id="refreshBtn" class="btn btn-primary">刷新余额与衰减</button>
-                <div class="alert alert-warning" style="margin-top: 20px;">
-                    注意：长期不操作账户将自动进行月度衰减
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <div class="card-number">7</div>
-                <h2 class="card-title">投票治理</h2>
-            </div>
-            <div class="btn-group">
-                <button id="loadApplicants" class="btn btn-primary">加载申请列表</button>
-                <button id="getRewardsBtn" class="btn btn-success">领取投票奖励</button>
-            </div>
-            
-            <div id="applicantsList" style="margin-top: 25px;"></div>
-            
-            <div id="voteSection" class="vote-section" style="display:none;">
-                <h3 style="margin-bottom: 15px;">投票操作</h3>
-                <p style="margin-bottom: 15px;">对申请地址: <strong id="voteAddr" style="font-family: monospace;"></strong> 进行投票</p>
-                <div class="btn-group">
-                    <button id="voteApprove" class="btn btn-success">同意认证</button>
-                    <button id="voteReject" class="btn btn-danger">反对认证</button>
-                </div>
-                <div class="alert alert-info" style="margin-top: 15px;">
-                    每次投票消耗1000 DC，投票获胜方可获得2000 DC奖励
-                </div>
-            </div>
-        </div>
-
-        <footer class="footer">
-            <p>DeCurrency (DC) 代币管理系统 • 基于Polygon区块链 • 版本 1.2</p>
-            <p style="margin-top: 5px;">© 2023 DeCurrency Platform. 仅供演示使用。</p>
-        </footer>
+<main>
+  <!-- 首页 -->
+  <section id="home" class="active">
+    <div class="hero">
+      <div>
+        <h1>民主货币 · 个人主权货币</h1>
+        <p>DeCurrency（DC）是一套以<strong>真实个人</strong>为最小单位的全球货币系统。</p>
+        <p>它试图将<strong>货币的铸造权与治理权</strong>，从国家、资本与中心化机构手中，<strong>公平地交还给每一个真实存在的人</strong>。</p>
+        <p>这是一套建立在身份共识之上的<strong>全球个人主权货币体系</strong>。</p>
+      </div>
+      <div class="card">
+        <h3>核心特性</h3>
+        <p>• 将<strong>货币铸造权公平赋予每一个真实的个人</strong></p>
+        <p>• 一人一身份，社区共识验证</p>
+        <p>• 身份即铸币权、治理权与长期收益权</p>
+        <p>• 代币周期性衰减，防止囤积与垄断</p>
+        <p>• 构建一套<strong>全球个人主权共识的货币体系</strong></p>
+      </div>
     </div>
 
-    <script>
-        const contractAddress = "0x8Cb3bA05Efa695799E1cF0A2d2921e2387CbFB2C";
-        const abi = [
-            {"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
-            {"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
-            {"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"verified","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"voter","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"lastclaimtime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-            {"inputs":[],"name":"claim","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"internalType":"string","name":"_URL","type":"string"}],"name":"application","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[],"name":"bevoter","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[],"name":"refreshbalance","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[],"name":"refreshapplicants","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"index","type":"uint256"}],"name":"get_address_from_applylist","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"internalType":"address","name":"_Address","type":"address"},{"internalType":"bool","name":"approv","type":"bool"}],"name":"vote","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[],"name":"getrewards","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"internalType":"address","name":"_Address","type":"address"}],"name":"application_URL","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"}
-        ];
+    <h2>我们解决什么问题</h2>
+    <div class="card">
+      <p>• 货币铸造权被少数主体长期垄断</p>
+      <p>• 个人无法直接参与货币发行体系</p>
+      <p>• 治理权与真实个人脱钩</p>
+      <p>• 全球范围内缺乏以“人”为单位的价值共识</p>
+    </div>
 
-        let web3, contract, account;
-        let claimTimerInterval = null;
+    <h2>DeCurrency 的答案</h2>
+    <div class="card">
+      <p>DeCurrency 的目标不是创造一种更快的支付工具，而是：</p>
+      <p><strong>让货币的发行权回归到每一个真实存在的人。</strong></p>
+      <p>在 DC 体系中，铸币不依赖国家、公司、矿机或资本，而依赖全球个人对“你是一个真实的人”的共识。</p>
+      <p>这是一套面向全人类的<strong>个人主权货币协议</strong>。</p>
+    </div>
+  </section>
 
-        // 统一错误处理：能显示合约 revert 原因
-        function getErrorMessage(err) {
-            console.error("交易错误详情:", err);
-            if (err.code === 4001) return "用户拒绝了交易";
-            if (err.reason) return "合约错误: " + err.reason;
-            if (err.data && err.data.message) return "合约错误: " + err.data.message;
-            if (err.message) {
-                const match = err.message.match(/execution reverted: (.*?)(\(|$)/);
-                if (match) return "合约错误: " + match[1];
-                return "交易失败: " + err.message;
-            }
-            return "未知错误，请查看浏览器控制台（F12）";
-        }
+  <!-- 使用与治理 -->
+  <section id="docs">
+    <h1>使用与治理说明</h1>
 
-        function showAlert(message, type = "info") {
-            const alert = document.createElement("div");
-            alert.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 25px;
-                border-radius: 8px;
-                color: white;
-                font-weight: 500;
-                z-index: 1000;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-                max-width: 400px;
-                word-wrap: break-word;
-                animation: slideIn 0.3s ease;
-            `;
-            alert.textContent = message;
+    <h2>合约信息</h2>
+    <div class="card">
+      <p><strong>部署网络：</strong>Polygon 主网</p>
+      <p><strong>合约地址：</strong></p>
+      <p><code>0x8Cb3bA05Efa695799E1cF0A2d2921e2387CbFB2C</code></p>
+      <p><strong>区块链浏览器：</strong></p>
+      <p>
+        <a href="https://polygonscan.com/address/0x8Cb3bA05Efa695799E1cF0A2d2921e2387CbFB2C#writeContract" target="_blank" style="color: var(--accent);">在 Polygon 浏览器中查看与交互</a>
+      </p>
+    </div>
 
-            if (type === "success") alert.style.background = "var(--success-color)";
-            else if (type === "error") alert.style.background = "var(--danger-color)";
-            else if (type === "warning") { alert.style.background = "var(--warning-color)"; alert.style.color = "var(--dark-color)"; }
-            else alert.style.background = "var(--primary-color)";
+    <h2>一、身份认证</h2>
+    <div class="card">
+      <p>提交能证明你是真实个人的链接，交由社区验证。</p>
+      <pre>application(string URL)</pre>
+      <p>消耗：5,000 DC</p>
+    </div>
 
-            document.body.appendChild(alert);
+    <h2>二、每日铸币</h2>
+    <div class="card">
+      <pre>claim()</pre>
+      <p>已验证身份：每 24 小时可领取 1,000 DC</p>
+    </div>
 
-            setTimeout(() => {
-                alert.style.animation = "slideOut 0.3s ease";
-                setTimeout(() => alert.remove(), 300);
-            }, type === "info" ? 2000 : 4000);
-        }
+    <h2>三、成为验证者</h2>
+    <div class="card">
+      <pre>bevoter()</pre>
+      <p>最多 200 位验证者，按 7 天最小余额与活跃度竞争。</p>
+    </div>
 
-        async function init() {
-            if (!window.ethereum) {
-                showAlert("请安装MetaMask钱包", "warning");
-                return;
-            }
+    <h2>四、投票与奖励</h2>
+    <div class="card">
+      <pre>vote(address applicant, bool approve)</pre>
+      <p>每票消耗 1,000 DC，满 100 票结算。</p>
+      <pre>getrewards()</pre>
+      <p>判断正确奖励 2,000 DC。</p>
+    </div>
 
-            web3 = new Web3(window.ethereum);
-            web3.eth.handleRevert = true; // 关键：启用 revert reason
+    <h2>五、代币衰减</h2>
+    <div class="card">
+      <p>每 30 天约衰减千分之 3，鼓励流通与参与。</p>
+      <pre>refreshbalance()</pre>
+    </div>
+  </section>
+</main>
 
-            // 自动添加/切换到稳定 Polygon RPC
-            try {
-                await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x89' }] });
-            } catch (e) {
-                if (e.code === 4902) {
-                    await ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{
-                            chainId: '0x89',
-                            chainName: 'Polygon Mainnet',
-                            nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
-                            rpcUrls: ['https://polygon-rpc.com/', 'https://rpc.ankr.com/polygon'],
-                            blockExplorerUrls: ['https://polygonscan.com']
-                        }]
-                    });
-                }
-            }
+<footer>
+  DeCurrency · 一个以“人”为本位的去中心化货币体系
+</footer>
 
-            contract = new web3.eth.Contract(abi, contractAddress);
-
-            window.ethereum.on('accountsChanged', async (accounts) => {
-                if (accounts.length > 0) {
-                    account = accounts[0];
-                    document.getElementById("account").innerText = account.substr(0,6) + "..." + account.substr(-4);
-                    await loadInfo();
-                    await checkClaimStatus();
-                    showAlert("账户已切换", "info");
-                } else {
-                    account = null;
-                    document.getElementById("account").innerText = "未连接";
-                    document.getElementById("status").innerText = "未连接";
-                    document.getElementById("status").className = "status-indicator status-disconnected";
-                }
-            });
-
-            window.ethereum.on('chainChanged', () => location.reload());
-
-            // 自动连接
-            try {
-                const accounts = await ethereum.request({ method: 'eth_accounts' });
-                if (accounts.length > 0) {
-                    account = accounts[0];
-                    document.getElementById("account").innerText = account.substr(0,6) + "..." + account.substr(-4);
-                    document.getElementById("status").innerText = "已连接";
-                    document.getElementById("status").className = "status-indicator status-connected";
-                    await loadInfo();
-                    await checkClaimStatus();
-                }
-            } catch (e) { console.log(e); }
-        }
-
-        // 连接按钮
-        document.getElementById("connectBtn").onclick = async () => {
-            try {
-                const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-                account = accounts[0];
-                document.getElementById("account").innerText = account.substr(0,6) + "..." + account.substr(-4);
-                document.getElementById("status").innerText = "已连接";
-                document.getElementById("status").className = "status-indicator status-connected";
-                await loadInfo();
-                await checkClaimStatus();
-                showAlert("钱包连接成功！", "success");
-            } catch (err) {
-                showAlert(err.code === 4001 ? "用户拒绝连接" : "连接失败", "error");
-            }
-        };
-
-        async function loadInfo() {
-            if (!account) return;
-            try {
-                const balance = await contract.methods.balanceOf(account).call();
-                const verified = await contract.methods.verified(account).call();
-                const isVoter = await contract.methods.voter(account).call();
-                const supply = await contract.methods.totalSupply().call();
-                let lastClaimTime = 0;
-                try { lastClaimTime = await contract.methods.lastclaimtime(account).call(); } catch (e) {}
-
-                document.getElementById("balance").innerText = (balance / 100).toFixed(2) + " DC";
-                document.getElementById("verified").innerText = verified ? "已认证" : "未认证";
-                document.getElementById("verified").style.color = verified ? "var(--success-color)" : "var(--danger-color)";
-                document.getElementById("voter").innerText = isVoter ? "是" : "否";
-                document.getElementById("totalSupply").innerText = (supply / 100).toFixed(2) + " DC";
-
-                if (lastClaimTime > 0) {
-                    const diff = Math.floor(Date.now() / 1000) - lastClaimTime;
-                    if (diff < 86400) {
-                        const h = Math.floor(diff / 3600);
-                        const m = Math.floor((diff % 3600) / 60);
-                        const s = diff % 60;
-                        document.getElementById("lastClaimTime").innerText = `${h}小时${m}分${s}秒前`;
-                    } else {
-                        document.getElementById("lastClaimTime").innerText = Math.floor(diff / 86400) + "天前";
-                    }
-                } else {
-                    document.getElementById("lastClaimTime").innerText = "从未铸造";
-                }
-
-                document.getElementById("authWarning").style.display = verified ? "none" : "block";
-                document.getElementById("claimBtn").disabled = !verified;
-            } catch (err) {
-                showAlert("加载信息失败，请检查网络", "error");
-            }
-        }
-
-        async function checkClaimStatus() {
-            if (!account) return;
-            try {
-                const verified = await contract.methods.verified(account).call();
-                if (!verified) {
-                    document.getElementById("claimStatus").style.display = "block";
-                    document.getElementById("claimStatus").innerHTML = '<div class="alert alert-danger">身份未认证，请先完成身份验证</div>';
-                    document.getElementById("claimBtn").disabled = true;
-                    return;
-                }
-
-                const last = await contract.methods.lastclaimtime(account).call();
-                const now = Math.floor(Date.now() / 1000);
-                const cooldown = 86400;
-
-                if (last == 0 || now - last >= cooldown) {
-                    document.getElementById("claimStatus").innerHTML = '<div class="claim-available">可以铸造代币</div>';
-                    document.getElementById("claimStatus").style.display = "block";
-                    document.getElementById("claimBtn").disabled = false;
-                    document.getElementById("timerDisplay").style.display = "none";
-                    if (claimTimerInterval) clearInterval(claimTimerInterval);
-                } else {
-                    const remain = cooldown - (now - last);
-                    document.getElementById("claimStatus").innerHTML = `<div class="claim-waiting">还需要 ${formatTime(remain)} 才能铸造</div>`;
-                    document.getElementById("claimStatus").style.display = "block";
-                    document.getElementById("timerDisplay").style.display = "block";
-                    document.getElementById("timer").textContent = formatTime(remain);
-                    document.getElementById("claimBtn").disabled = true;
-
-                    if (claimTimerInterval) clearInterval(claimTimerInterval);
-                    claimTimerInterval = setInterval(() => {
-                        const r = cooldown - (Math.floor(Date.now() / 1000) - last);
-                        if (r <= 0) {
-                            clearInterval(claimTimerInterval);
-                            checkClaimStatus();
-                        } else {
-                            document.getElementById("timer").textContent = formatTime(r);
-                            document.getElementById("claimStatus").innerHTML = `<div class="claim-waiting">还需要 ${formatTime(r)} 才能铸造</div>`;
-                        }
-                    }, 1000);
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        function formatTime(sec) {
-            const h = Math.floor(sec / 3600).toString().padStart(2,'0');
-            const m = Math.floor((sec % 3600) / 60).toString().padStart(2,'0');
-            const s = (sec % 60).toString().padStart(2,'0');
-            return `${h}:${m}:${s}`;
-        }
-
-        // 刷新信息
-        document.getElementById("loadInfo").onclick = async () => {
-            const btn = document.getElementById("loadInfo");
-            const orig = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<div class="loading-spinner"></div>加载中...';
-            await loadInfo();
-            await checkClaimStatus();
-            btn.disabled = false;
-            btn.innerHTML = orig;
-            showAlert("信息已刷新", "success");
-        };
-
-        // 铸造代币
-        document.getElementById("claimBtn").onclick = async () => {
-            try {
-                showAlert("正在铸造，请确认交易...", "info");
-                await contract.methods.claim().send({ from: account, gas: 800000 });
-                showAlert("铸造成功！+1000 DC", "success");
-                await loadInfo();
-                await checkClaimStatus();
-            } catch (err) {
-                showAlert(getErrorMessage(err), "error");
-            }
-        };
-
-        // 提交认证申请（最关键的部分）
-        document.getElementById("applyBtn").onclick = async () => {
-            const url = document.getElementById("url").value.trim();
-            if (!url) return showAlert("请填写证明链接", "warning");
-
-            try {
-                // 前置检查
-                const balance = await contract.methods.balanceOf(account).call();
-                if (Number(balance) < 500000) { // 5000 DC = 500000 (精度2位)
-                    showAlert("DC余额不足5000，无法申请", "error");
-                    return;
-                }
-                const verified = await contract.methods.verified(account).call();
-                if (verified) {
-                    showAlert("您已通过认证，无需再次申请", "info");
-                    return;
-                }
-
-                showAlert("正在提交申请，请确认交易（Gas可能较高）...", "info");
-                await contract.methods.application(url).send({
-                    from: account,
-                    gas: 3000000  // 高 gas 防止 out of gas
-                });
-                showAlert("申请提交成功！等待社区投票", "success");
-                document.getElementById("url").value = "";
-                await loadInfo();
-            } catch (err) {
-                showAlert(getErrorMessage(err), "error");
-            }
-        };
-
-        // 其他按钮（统一错误处理）
-        document.getElementById("bevoterBtn").onclick = async () => {
-            try {
-                await contract.methods.bevoter().send({ from: account, gas: 600000 });
-                showAlert("成功成为投票者", "success");
-                await loadInfo();
-            } catch (err) {
-                showAlert(getErrorMessage(err), "error");
-            }
-        };
-
-        document.getElementById("refreshBtn").onclick = async () => {
-            try {
-                await contract.methods.refreshbalance().send({ from: account });
-                showAlert("余额刷新成功", "success");
-                await loadInfo();
-            } catch (err) {
-                showAlert(getErrorMessage(err), "error");
-            }
-        };
-
-        document.getElementById("loadApplicants").onclick = async () => {
-            try {
-                const count = await contract.methods.refreshapplicants().call();
-                const list = document.getElementById("applicantsList");
-                list.innerHTML = `<h3>当前申请 (${count}个)</h3>`;
-                if (count == 0) {
-                    list.innerHTML += "<p>暂无待审核申请</p>";
-                    return;
-                }
-                for (let i = 0; i < count; i++) {
-                    const addr = await contract.methods.get_address_from_applylist(i).call();
-                    const url = await contract.methods.application_URL(addr).call();
-                    list.innerHTML += `
-                        <div class="applicant-card">
-                            <h4>申请 #${i+1}</h4>
-                            <div class="applicant-address">${addr}</div>
-                            <p><strong>证明材料:</strong> <a href="${url}" target="_blank">${url}</a></p>
-                            <button class="btn btn-primary" onclick="startVote('${addr}')">投票此申请</button>
-                        </div>`;
-                }
-            } catch (err) {
-                showAlert(getErrorMessage(err), "error");
-            }
-        };
-
-        window.startVote = (addr) => {
-            document.getElementById("voteAddr").innerText = addr;
-            document.getElementById("voteSection").style.display = "block";
-            window.currentVoteAddr = addr;
-            document.getElementById("voteSection").scrollIntoView({behavior: 'smooth'});
-        };
-
-        document.getElementById("voteApprove").onclick = async () => doVote(true);
-        document.getElementById("voteReject").onclick = async () => doVote(false);
-
-        async function doVote(approve) {
-            try {
-                await contract.methods.vote(window.currentVoteAddr, approve).send({ from: account, gas: 800000 });
-                showAlert(approve ? "同意投票成功" : "反对投票成功", "success");
-                document.getElementById("voteSection").style.display = "none";
-            } catch (err) {
-                showAlert(getErrorMessage(err), "error");
-            }
-        }
-
-        document.getElementById("getRewardsBtn").onclick = async () => {
-            try {
-                await contract.methods.getrewards().send({ from: account });
-                showAlert("奖励领取成功", "success");
-                await loadInfo();
-            } catch (err) {
-                showAlert(getErrorMessage(err), "error");
-            }
-        };
-
-        // 动画
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-            @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-        `;
-        document.head.appendChild(style);
-
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+<script>
+  function show(id) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+</script>
+<style>
+.bannerWrap{
+  position: relative;
+  width: 100%;
+  height: 360px;
+  overflow: hidden;
+}
+#networkBanner{
+  width:100%;
+  height:360px;
+  display:block;
+  background: radial-gradient(circle at top, #0b1f1a, #050707);
+}
+.bannerOverlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  background: transparent;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+.bannerOverlay h1{
+  font-size:42px;
+  margin:0 0 12px;
+}
+.bannerOverlay p{
+  color: var(--text);
+  opacity:.85;
+}
+.bannerFeatures{
+  margin-top:18px;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.bannerFeatures span{
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:13px;
+  background: rgba(0,0,0,0.15);
+  border:1px solid rgba(255,255,255,0.18);
+}
+</style>
+<script>
+const canvas = document.getElementById('networkBanner');
+const ctx = canvas.getContext('2d');
+let w,h;
+function resize(){w=canvas.width=window.innerWidth;h=canvas.height=360;}
+window.addEventListener('resize',resize);resize();
+const POINTS=60;
+const points=[...Array(POINTS)].map(()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3}));
+function draw(){
+  ctx.clearRect(0,0,w,h);
+  for(let i=0;i<POINTS;i++)for(let j=i+1;j<POINTS;j++){
+    const dx=points[i].x-points[j].x,dy=points[i].y-points[j].y,d=Math.hypot(dx,dy);
+    if(d<120){ctx.strokeStyle=`rgba(0,255,200,${(1-d/120)*.4})`;ctx.beginPath();ctx.moveTo(points[i].x,points[i].y);ctx.lineTo(points[j].x,points[j].y);ctx.stroke();}
+  }
+  for(const p of points){ctx.beginPath();ctx.arc(p.x,p.y,2.2,0,Math.PI*2);ctx.fillStyle='rgba(0,255,200,.9)';ctx.fill();p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;}
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
 </body>
 </html>
