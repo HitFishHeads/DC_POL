@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeCurrency (DC) - 去中心化民主货币系统</title>
     <style>
-        /* 保留原有所有样式，此处省略 */
         * {
             margin: 0;
             padding: 0;
@@ -14,21 +13,21 @@
             scroll-behavior: smooth;
         }
         :root {
-            --primary-color: #81c784; /* 绿色系主色（保留原有绿色用于其他模块） */
-            --secondary-color: #4fc3f7; /* 辅助蓝色（天蓝色主色） */
-            --accent-color: #a0d6a0; /* 绿色系辅助色（保留） */
-            --sky-blue-1: #4fc3f7; /* 天蓝色渐变1 */
-            --sky-blue-2: #81d4fa; /* 天蓝色渐变2 */
-            --sky-blue-3: #29b6f6; /* 天蓝色渐变3 */
+            --primary-color: #81c784;
+            --secondary-color: #4fc3f7;
+            --accent-color: #a0d6a0;
+            --sky-blue-1: #4fc3f7;
+            --sky-blue-2: #81d4fa;
+            --sky-blue-3: #29b6f6;
             --bg-dark: #0a0a16;
             --bg-card: rgba(15, 15, 30, 0.8);
             --bg-card-hover: rgba(20, 20, 40, 0.9);
             --bg-nav: rgba(5, 5, 16, 0.95);
             --border-color: #2d3748;
-            --shadow: 0 0 25px rgba(129, 199, 132, 0.15); /* 绿色阴影（保留） */
-            --shadow-hover: 0 0 30px rgba(129, 199, 132, 0.25); /* 绿色阴影（保留） */
-            --sky-shadow: 0 0 20px rgba(79, 195, 247, 0.8); /* 天蓝色发光阴影 */
-            --sky-shadow-light: 0 0 10px rgba(129, 212, 250, 0.5); /* 天蓝色淡发光 */
+            --shadow: 0 0 25px rgba(129, 199, 132, 0.15);
+            --shadow-hover: 0 0 30px rgba(129, 199, 132, 0.25);
+            --sky-shadow: 0 0 20px rgba(79, 195, 247, 0.8);
+            --sky-shadow-light: 0 0 10px rgba(129, 212, 250, 0.5);
         }
         body {
             background-color: var(--bg-dark);
@@ -39,16 +38,14 @@
                 radial-gradient(circle at 90% 80%, rgba(160, 214, 160, 0.05) 0%, transparent 20%);
             min-height: 100vh;
         }
-        /* 页面容器：侧边导航+主内容 */
         .page-container {
             display: flex;
             min-height: 100vh;
         }
-        /* 侧边导航 */
         .sidebar {
             width: 280px;
             background: var(--bg-nav);
-            border-right: 1px solid rgba(129, 199, 132, 0.1); /* 绿色边框（保留） */
+            border-right: 1px solid rgba(129, 199, 132, 0.1);
             padding: 2rem 0;
             position: fixed;
             height: 100vh;
@@ -58,13 +55,13 @@
         .logo {
             text-align: center;
             padding: 0 1.5rem 2rem;
-            border-bottom: 1px solid rgba(129, 199, 132, 0.1); /* 绿色边框（保留） */
+            border-bottom: 1px solid rgba(129, 199, 132, 0.1);
             margin-bottom: 2rem;
         }
         .logo h2 {
             color: var(--primary-color);
             font-size: 1.8rem;
-            text-shadow: 0 0 10px rgba(129, 199, 132, 0.5); /* 绿色发光（保留） */
+            text-shadow: 0 0 10px rgba(129, 199, 132, 0.5);
             margin-bottom: 0.5rem;
         }
         .logo p {
@@ -87,20 +84,19 @@
             color: #d0d0e0;
             text-decoration: none;
             border-radius: 8px;
-            transition: all  0.3s ease;
+            transition: all 0.3s ease;
             position: relative;
         }
         .nav-link:hover {
-            background: rgba(129, 199, 132, 0.1); /* 绿色背景（保留） */
+            background: rgba(129, 199, 132, 0.1);
             color: var(--primary-color);
             padding-left: 1.5rem;
         }
         .nav-link.active {
-            background: linear-gradient(135deg, rgba(129, 199, 132, 0.15), rgba(160, 214, 160, 0.1)); /* 绿色渐变（保留） */
+            background: linear-gradient(135deg, rgba(129, 199, 132, 0.15), rgba(160, 214, 160, 0.1));
             color: var(--primary-color);
             border-left: 3px solid var(--primary-color);
         }
-        /* Banner画布样式 */
         #network-banner {
             position: relative;
             width: 100%;
@@ -125,62 +121,50 @@
             padding: 0 20px;
             width: 100%;
         }
-        /* 调整banner标题的行高和间距，实现三行布局（改为天蓝色） */
         .banner-content h1 {
             font-size: 3.8rem;
-            margin-bottom: 0.8rem; /* 减小间距，适配三行 */
-            text-shadow: var(--sky-shadow); /* 天蓝色发光 */
-            background: linear-gradient(90deg, var(--sky-blue-1), var(--sky-blue-2), var(--sky-blue-3)); /* 天蓝色渐变 */
+            margin-bottom: 0.8rem;
+            text-shadow: var(--sky-shadow);
+            background: linear-gradient(90deg, var(--sky-blue-1), var(--sky-blue-2), var(--sky-blue-3));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            animation: gradient-shift 40s ease infinite; /* 频率降低80%：8*5=40s */
+            animation: gradient-shift 40s ease infinite;
             background-size: 200% auto;
-            line-height: 1.2; /* 控制行高，避免文字重叠 */
+            line-height: 1.2;
         }
-        /* 新增banner副标题样式（改为天蓝色） */
         .banner-subtitle {
             font-size: 1.8rem;
-            color: var(--sky-blue-2); /* 天蓝色 */
+            color: var(--sky-blue-2);
             margin-bottom: 1rem;
-            text-shadow: var(--sky-shadow-light); /* 天蓝色淡发光 */
+            text-shadow: var(--sky-shadow-light);
         }
-        /* 调整banner描述文字样式，拆分几点展示（改为天蓝色） */
         .banner-desc {
             font-size: 1.1rem;
-            color: var(--sky-blue-2); /* 天蓝色 */
+            color: var(--sky-blue-2);
             max-width: 900px;
             margin: 0 auto;
             opacity: 0.9;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 1.5rem; /* 几点之间的间距 */
+            gap: 1.5rem;
         }
-        /* 描述文字的每个点的样式 */
         .banner-desc span {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
         }
-        /* 描述文字的点标记（改为天蓝色） */
         .banner-desc span::before {
             content: "•";
-            color: var(--sky-blue-1); /* 天蓝色 */
+            color: var(--sky-blue-1);
             font-size: 1.5rem;
         }
         @keyframes gradient-shift {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        /* 主内容区 */
         .main-content {
             flex: 1;
             margin-left: 280px;
@@ -190,7 +174,6 @@
             margin: 0 auto;
             padding: 3rem 2rem;
         }
-        /* 分页样式 */
         .page {
             display: none;
             animation: fadeIn 0.5s ease-in-out;
@@ -199,35 +182,28 @@
             display: block;
         }
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        /* 章节样式 */
         .section {
             margin-bottom: 4rem;
             background: var(--bg-card);
             padding: 3rem;
             border-radius: 16px;
             box-shadow: var(--shadow);
-            border: 1px solid rgba(129, 199, 132, 0.05); /* 绿色边框（保留） */
+            border: 1px solid rgba(129, 199, 132, 0.05);
             transition: all 0.3s ease;
         }
         .section:hover {
             box-shadow: var(--shadow-hover);
-            border-color: rgba(129, 199, 132, 0.1); /* 绿色边框（保留） */
+            border-color: rgba(129, 199, 132, 0.1);
             transform: translateY(-2px);
         }
         .section h2 {
             font-size: 2.2rem;
             color: var(--primary-color);
             margin-bottom: 2.5rem;
-            border-bottom: 2px solid rgba(129, 199, 132, 0.1); /* 绿色边框（保留） */
+            border-bottom: 2px solid rgba(129, 199, 132, 0.1);
             padding-bottom: 0.8rem;
             position: relative;
         }
@@ -238,7 +214,7 @@
             left: 0;
             width: 80px;
             height: 2px;
-            background: var(--primary-color); /* 绿色（保留） */
+            background: var(--primary-color);
         }
         .section h3 {
             font-size: 1.4rem;
@@ -267,7 +243,6 @@
             font-family: 'Consolas', monospace;
             font-size: 1rem;
         }
-        /* 核心：区块化样式 */
         .blocks-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
@@ -278,13 +253,12 @@
             background: linear-gradient(135deg, rgba(20, 20, 40, 0.7), rgba(15, 15, 30, 0.9));
             border-radius: 12px;
             padding: 2rem 1.8rem;
-            border: 1px solid rgba(129, 199, 132, 0.1); /* 绿色边框（保留） */
+            border: 1px solid rgba(129, 199, 132, 0.1);
             box-shadow: var(--shadow);
             transition: all 0.4s ease;
             position: relative;
             overflow: hidden;
         }
-        /* 区块顶部渐变条 */
         .block-card::before {
             content: '';
             position: absolute;
@@ -292,13 +266,13 @@
             left: 0;
             width: 100%;
             height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); /* 绿色渐变（保留） */
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
             border-radius: 4px 4px 0 0;
         }
         .block-card:hover {
             transform: translateY(-5px) scale(1.02);
             box-shadow: var(--shadow-hover);
-            border-color: rgba(129, 199, 132, 0.2); /* 绿色边框（保留） */
+            border-color: rgba(129, 199, 132, 0.2);
             background: var(--bg-card-hover);
         }
         .block-card h4 {
@@ -309,7 +283,6 @@
             align-items: center;
             gap: 0.8rem;
         }
-        /* 区块图标样式 */
         .block-card h4 i {
             font-size: 1.5rem;
             color: var(--accent-color);
@@ -318,7 +291,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(160, 214, 160, 0.1); /* 绿色背景（保留） */
+            background: rgba(160, 214, 160, 0.1);
             border-radius: 8px;
         }
         .block-card p {
@@ -326,7 +299,6 @@
             font-size: 1rem;
             line-height: 1.7;
         }
-        /* 步骤区块样式（线性排列） */
         .steps-blocks {
             display: flex;
             flex-direction: column;
@@ -337,7 +309,7 @@
             background: linear-gradient(135deg, rgba(20, 20, 40, 0.7), rgba(15, 15, 30, 0.9));
             border-radius: 12px;
             padding: 2rem;
-            border: 1px solid rgba(129, 199, 132, 0.1); /* 绿色边框（保留） */
+            border: 1px solid rgba(129, 199, 132, 0.1);
             box-shadow: var(--shadow);
             transition: all 0.4s ease;
             position: relative;
@@ -351,7 +323,7 @@
             transform: translateY(-50%);
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); /* 绿色渐变（保留） */
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             color: var(--bg-dark);
             font-weight: 700;
             font-size: 1.2rem;
@@ -359,7 +331,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 15px rgba(129, 199, 132, 0.3); /* 绿色发光（保留） */
+            box-shadow: 0 0 15px rgba(129, 199, 132, 0.3);
         }
         .step-card::after {
             content: '';
@@ -368,17 +340,16 @@
             left: calc(1.8rem + 20px);
             width: 1px;
             height: calc(100% - 40px);
-            background: linear-gradient(to bottom, var(--primary-color), transparent); /* 绿色渐变（保留） */
+            background: linear-gradient(to bottom, var(--primary-color), transparent);
             opacity: 0.3;
         }
-        /* 最后一个步骤隐藏竖线 */
         .steps-blocks .step-card:last-child::after {
             display: none;
         }
         .step-card:hover {
             transform: translateX(5px);
             box-shadow: var(--shadow-hover);
-            border-color: rgba(129, 199, 132, 0.2); /* 绿色边框（保留） */
+            border-color: rgba(129, 199, 132, 0.2);
             background: var(--bg-card-hover);
         }
         .step-card h4 {
@@ -391,7 +362,6 @@
             font-size: 1rem;
             line-height: 1.7;
         }
-        /* 合约信息卡片样式（适配主内容区） */
         .contract-info-card {
             background: var(--bg-card);
             padding: 2rem;
@@ -423,7 +393,6 @@
             padding: 0.3rem 0.8rem;
             border-radius: 6px;
         }
-        /* 新增：个人信息板块样式 */
         .wallet-connect-area {
             display: flex;
             align-items: center;
@@ -451,21 +420,6 @@
         .wallet-connect-btn:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-hover);
-        }
-        .wallet-select {
-            padding: 1rem 1.2rem;
-            background: var(--bg-card);
-            border: 1px solid rgba(129, 199, 132, 0.1);
-            border-radius: 8px;
-            color: #e0e0e0;
-            font-size: 1rem;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            display: none; /* 暂时隐藏，如需多钱包可开启 */
-        }
-        .wallet-select option {
-            background: var(--bg-dark);
-            color: #e0e0e0;
         }
         .wallet-info {
             display: flex;
@@ -558,7 +512,6 @@
             background: rgba(79, 195, 247, 0.1);
             color: var(--secondary-color);
         }
-        /* 复制成功提示 */
         .copy-toast {
             position: fixed;
             bottom: 20px;
@@ -574,88 +527,48 @@
             animation: toastIn 0.3s ease-in-out;
         }
         @keyframes toastIn {
-            from {
-                transform: translateX(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
-        /* 响应式设计 */
         @media (max-width: 1200px) {
-            .sidebar {
-                width: 250px;
-            }
-            .main-content {
-                margin-left: 250px;
-            }
-            .banner-content h1 {
-                font-size: 3rem;
-            }
-            .banner-subtitle {
-                font-size: 1.5rem;
-            }
-            .blocks-grid {
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            }
+            .sidebar { width: 250px; }
+            .main-content { margin-left: 250px; }
+            .banner-content h1 { font-size: 3rem; }
+            .banner-subtitle { font-size: 1.5rem; }
+            .blocks-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
         }
         @media (max-width: 768px) {
-            .page-container {
-                flex-direction: column;
-            }
+            .page-container { flex-direction: column; }
             .sidebar {
                 width: 100%;
                 height: auto;
                 position: static;
                 border-right: none;
-                border-bottom: 1px solid rgba(129, 199, 132, 0.1); /* 绿色边框（保留） */
+                border-bottom: 1px solid rgba(129, 199, 132, 0.1);
                 padding: 1rem 0;
             }
-            .logo {
-                padding: 0 1rem 1rem;
-                margin-bottom: 1rem;
-            }
+            .logo { padding: 0 1rem 1rem; margin-bottom: 1rem; }
             .nav-list {
                 display: flex;
                 overflow-x: auto;
                 padding: 0 1rem;
                 gap: 0.5rem;
             }
-            .nav-item {
-                white-space: nowrap;
-            }
-            .main-content {
-                margin-left: 0;
-            }
-            #network-banner {
-                height: 300px;
-            }
-            .banner-content h1 {
-                font-size: 2.2rem;
-            }
-            .banner-subtitle {
-                font-size: 1.2rem;
-            }
+            .nav-item { white-space: nowrap; }
+            .main-content { margin-left: 0; }
+            #network-banner { height: 300px; }
+            .banner-content h1 { font-size: 2.2rem; }
+            .banner-subtitle { font-size: 1.2rem; }
             .banner-desc {
                 font-size: 0.9rem;
                 gap: 1rem;
                 flex-direction: column;
                 align-items: center;
             }
-            .content-wrapper {
-                padding: 2rem 1rem;
-            }
-            .section {
-                padding: 2rem 1.5rem;
-            }
-            .section h2 {
-                font-size: 1.8rem;
-            }
-            .blocks-grid {
-                grid-template-columns: 1fr;
-            }
+            .content-wrapper { padding: 2rem 1rem; }
+            .section { padding: 2rem 1.5rem; }
+            .section h2 { font-size: 1.8rem; }
+            .blocks-grid { grid-template-columns: 1fr; }
             .step-card {
                 padding-left: 4.5rem;
             }
@@ -668,17 +581,13 @@
             .step-card::after {
                 left: calc(1rem + 17.5px);
             }
-            .contract-info-card {
-                padding: 1.5rem;
-            }
+            .contract-info-card { padding: 1.5rem; }
             .contract-info-card p {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 0.5rem;
             }
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
+            .info-grid { grid-template-columns: 1fr; }
             .wallet-connect-area {
                 flex-direction: column;
                 align-items: stretch;
@@ -689,14 +598,11 @@
             }
         }
     </style>
-    <!-- 引入图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- 更换为稳定的ethers.js CDN链接（优先使用jsdelivr） -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 </head>
 <body>
     <div class="page-container">
-        <!-- 侧边导航 -->
         <aside class="sidebar">
             <div class="logo">
                 <h2>DeCurrency (DC)</h2>
@@ -714,9 +620,7 @@
                 </li>
             </ul>
         </aside>
-        <!-- 主内容区 -->
         <main class="main-content">
-            <!-- 网络节点Banner -->
             <div id="network-banner">
                 <canvas id="networkCanvas"></canvas>
                 <div class="banner-content">
@@ -730,7 +634,6 @@
                 </div>
             </div>
             <div class="content-wrapper">
-                <!-- 分页1：核心理念 -->
                 <div id="concept-page" class="page active">
                     <section class="section">
                         <h2>DC代币系统核心理念</h2>
@@ -756,7 +659,6 @@
                         </div>
                     </section>
                 </div>
-                <!-- 分页2：参与和治理 -->
                 <div id="participate-page" class="page">
                     <div class="contract-info-card">
                         <h3>合约基础信息</h3>
@@ -790,7 +692,7 @@
                         <div class="blocks-grid" style="margin-top: 1.5rem;">
                             <div class="block-card">
                                 <h4><i class="fas fa-coins"></i>每日铸造代币</h4>
-                                <p>每日可铸造<strong class="highlight">1000 DC代币</strong>（需间隔24小时，调用<code class="code-inline">claim()</code>函数执行铸造）。</p>
+                                <p>每日可铸造<strong class="highlight">1000 DC代币</strong>（需间隔24小时，通过钱包直接调用<code class="code-inline">claim()</code>函数执行铸造）。</p>
                             </div>
                             <div class="block-card">
                                 <h4><i class="fas fa-user-check"></i>成为验证者</h4>
@@ -841,60 +743,43 @@
                         </div>
                     </section>
                 </div>
-                <!-- 分页3：个人信息 -->
                 <div id="profile-page" class="page">
                     <section class="section">
                         <h2>个人信息中心</h2>
-                        <!-- 钱包连接区域 -->
                         <div class="wallet-connect-area">
-                            <!-- 钱包选择下拉框（暂时隐藏，如需多钱包可开启） -->
-                            <select class="wallet-select" id="walletSelect">
-                                <option value="metamask">MetaMask</option>
-                                <option value="coinbase">Coinbase Wallet</option>
-                                <option value="walletconnect">Wallet Connect</option>
-                            </select>
-                            <!-- 连接钱包按钮 -->
                             <button class="wallet-connect-btn" id="connectWalletBtn">
                                 <i class="fas fa-link"></i> 连接Polygon钱包
                             </button>
-                            <!-- 钱包信息展示（默认隐藏） -->
                             <div class="wallet-info" id="walletInfo" style="display: none;">
                                 <span class="wallet-name" id="walletName">MetaMask</span>
                                 <div class="wallet-address">
-                                    <span class="address-text" id="walletAddress">0x8Cb3bA05Efa695799E1cF0A2d2921e2387CbFB2C</span>
+                                    <span class="address-text" id="walletAddress">0x...</span>
                                     <button class="copy-btn" id="copyBtn" title="复制地址">
                                         <i class="fas fa-copy"></i>
                                     </button>
                                 </div>
                             </div>
-                            <!-- 断开钱包按钮（默认隐藏） -->
                             <button class="disconnect-btn" id="disconnectBtn" style="display: none;">
                                 <i class="fas fa-unlink"></i> 断开钱包
                             </button>
                         </div>
-                        <!-- 钱包未连接时的提示 -->
                         <div id="walletNotConnected" class="wallet-not-connected">
                             <p>请先连接你的Polygon钱包，以查看个人资产和身份状态信息。</p>
                         </div>
-                        <!-- 钱包连接后的信息展示（默认隐藏） -->
                         <div id="profileInfo" style="display: none;">
                             <div class="info-grid">
-                                <!-- 代币数量 -->
                                 <div class="info-card">
                                     <h4><i class="fas fa-coins"></i> 我的DC代币数量</h4>
                                     <p id="tokenBalance">0.00 DC</p>
                                 </div>
-                                <!-- 身份认证状态 -->
                                 <div class="info-card">
                                     <h4><i class="fas fa-user-check"></i> 身份认证状态</h4>
                                     <p>当前状态：<span id="verifyStatus" class="status negative">未认证</span></p>
                                 </div>
-                                <!-- 投票权状态 -->
                                 <div class="info-card">
                                     <h4><i class="fas fa-vote-yea"></i> 投票权状态</h4>
                                     <p>当前状态：<span id="voteStatus" class="status negative">无投票权</span></p>
                                 </div>
-                                <!-- 铸造代币权限 -->
                                 <div class="info-card">
                                     <h4><i class="fas fa-hammer"></i> 铸造代币权限</h4>
                                     <p>当前状态：<span id="mintStatus" class="mint-status-content">-</span></p>
@@ -906,12 +791,10 @@
             </div>
         </main>
     </div>
-    <!-- 复制成功提示框 -->
     <div class="copy-toast" id="copyToast">地址复制成功！</div>
     <script>
-        // 等待页面和ethers.js完全加载后再执行代码
         document.addEventListener('DOMContentLoaded', async function() {
-            // ====================== Canvas动画部分（保留原有逻辑）======================
+            // ====================== Canvas 动画（保留）======================
             const canvas = document.getElementById('networkCanvas');
             const ctx = canvas.getContext('2d');
             function resizeCanvas() {
@@ -1040,329 +923,235 @@
             }
             resizeCanvas();
             animate();
-            // ====================== 分页切换逻辑（保留原有逻辑）======================
+
+            // ====================== 分页切换 ======================
             const navLinks = document.querySelectorAll('.nav-link');
             const pages = document.querySelectorAll('.page');
             navLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
-                    navLinks.forEach(link => link.classList.remove('active'));
-                    pages.forEach(page => page.classList.remove('active'));
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    pages.forEach(p => p.classList.remove('active'));
                     const targetPage = link.getAttribute('data-page');
                     link.classList.add('active');
                     document.getElementById(targetPage).classList.add('active');
                 });
             });
-            // ====================== 钱包连接逻辑（重写为真实交互）======================
-            // 全局变量
+
+            // ====================== 钱包连接与状态读取（无铸造交互）======================
             let provider = null;
-            let signer = null;
             let userAddress = null;
-            // DC代币合约地址和ABI（完整版）
             const DC_CONTRACT_ADDRESS = '0x8Cb3bA05Efa695799E1cF0A2d2921e2387CbFB2C';
             const DC_CONTRACT_ABI = [
-                'function balanceOf(address owner) view returns (uint256)',
+                'function balanceOf(address) view returns (uint256)',
                 'function decimals() view returns (uint8)',
                 'function verified(address) view returns (bool)',
                 'function lastclaimtime(address) view returns (uint256)'
             ];
-            // Polygon主网的chainId（137），测试网为80001
             const POLYGON_CHAIN_ID = 137;
-            // 身份过期时间（1年 = 365 * 24 * 3600 秒）
-            const VERIFY_OUTTIME = 365 * 24 * 3600;
-            // 铸造冷却时间（24小时 = 86400 秒）
-            const CLAIM_COOLDOWN = 86400;
-            // DOM元素
+            const CLAIM_COOLDOWN = 86400; // 24小时
+
             const connectWalletBtn = document.getElementById('connectWalletBtn');
-            const walletSelect = document.getElementById('walletSelect');
             const walletNotConnected = document.getElementById('walletNotConnected');
             const profileInfo = document.getElementById('profileInfo');
             const walletInfo = document.getElementById('walletInfo');
-            const walletName = document.getElementById('walletName');
             const walletAddress = document.getElementById('walletAddress');
             const copyBtn = document.getElementById('copyBtn');
             const disconnectBtn = document.getElementById('disconnectBtn');
             const copyToast = document.getElementById('copyToast');
-            const mintStatusContent = document.getElementById('mintStatus');
-            // 检查是否有ethers对象（双重保险）
+
             if (typeof ethers === 'undefined') {
-                alert('ethers.js库加载失败，请检查网络或更换CDN链接！');
+                alert('ethers.js库加载失败，请检查网络！');
                 connectWalletBtn.disabled = true;
-                connectWalletBtn.style.opacity = '0.5';
                 return;
             }
-            // 初始化
+
             if (window.ethereum) {
                 checkWalletConnection();
             } else {
-                alert('未检测到Web3钱包，请安装MetaMask等钱包插件！');
+                alert('请安装 MetaMask 等钱包插件！');
                 connectWalletBtn.disabled = true;
-                connectWalletBtn.style.opacity = '0.5';
             }
-            // 连接钱包按钮点击事件
+
             connectWalletBtn.addEventListener('click', async () => {
-                if (!window.ethereum) {
-                    alert('未检测到Web3钱包，请安装MetaMask等钱包插件！');
-                    return;
-                }
+                if (!window.ethereum) return;
                 try {
-                    // 显示加载状态
                     connectWalletBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 连接中...';
-                    // 1. 请求用户授权并获取账户
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     userAddress = accounts[0];
-                    // 2. 检查是否为Polygon主网
                     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
                     if (parseInt(chainId, 16) !== POLYGON_CHAIN_ID) {
-                        // 请求切换到Polygon主网
                         await switchToPolygonNetwork();
                     }
-                    // 3. 初始化provider和signer
                     provider = new ethers.providers.Web3Provider(window.ethereum);
-                    signer = provider.getSigner();
-                    // 4. 更新页面显示
                     updateWalletInfo();
-                    // 5. 获取用户DC代币余额和相关信息
                     await getUserProfileData();
                 } catch (error) {
-                    console.error('连接钱包失败：', error);
+                    console.error('连接失败：', error);
                     alert(`连接失败：${error.message}`);
-                    // 恢复按钮状态
                     connectWalletBtn.innerHTML = '<i class="fas fa-link"></i> 连接Polygon钱包';
                 }
             });
-            // 断开钱包按钮点击事件
+
             disconnectBtn.addEventListener('click', () => {
-                // 重置全局变量
                 provider = null;
-                signer = null;
                 userAddress = null;
-                // 恢复页面初始状态
                 walletInfo.style.display = 'none';
                 disconnectBtn.style.display = 'none';
                 profileInfo.style.display = 'none';
                 walletNotConnected.style.display = 'block';
                 connectWalletBtn.innerHTML = '<i class="fas fa-link"></i> 连接Polygon钱包';
-                connectWalletBtn.style.background = 'linear-gradient(135deg, var(--primary-color), var(--accent-color))';
-                // 重置钱包选择
-                walletSelect.value = 'metamask';
-                // 清除倒计时
                 if (window.mintCountdownInterval) {
                     clearInterval(window.mintCountdownInterval);
                     window.mintCountdownInterval = null;
                 }
             });
-            // 复制地址按钮点击事件
+
             copyBtn.addEventListener('click', async () => {
                 if (!userAddress) return;
                 try {
                     await navigator.clipboard.writeText(userAddress);
                     copyToast.style.display = 'block';
-                    setTimeout(() => {
-                        copyToast.style.display = 'none';
-                    }, 3000);
+                    setTimeout(() => copyToast.style.display = 'none', 3000);
                 } catch (err) {
-                    console.error('复制失败：', err);
                     alert('复制失败，请手动复制！');
                 }
             });
-            // 检查钱包是否已连接
+
             async function checkWalletConnection() {
                 try {
                     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                     if (accounts.length > 0) {
                         userAddress = accounts[0];
-                        // 检查链ID
                         const chainId = await window.ethereum.request({ method: 'eth_chainId' });
                         if (parseInt(chainId, 16) !== POLYGON_CHAIN_ID) {
-                            await switchToPolygonNetwork();
+                            alert('请将钱包切换到 Polygon 主网！');
+                            return;
                         }
-                        // 初始化provider和signer
                         provider = new ethers.providers.Web3Provider(window.ethereum);
-                        signer = provider.getSigner();
-                        // 更新页面
                         updateWalletInfo();
                         await getUserProfileData();
                     }
                 } catch (error) {
-                    console.error('检查钱包连接失败：', error);
+                    console.error('检查连接失败：', error);
                 }
             }
-            // 切换到Polygon主网
+
             async function switchToPolygonNetwork() {
                 try {
                     await window.ethereum.request({
                         method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: ethers.utils.hexValue(POLYGON_CHAIN_ID) }]
+                        params: [{ chainId: '0x89' }]
                     });
                 } catch (switchError) {
-                    // 若链未添加，则请求添加
                     if (switchError.code === 4902) {
                         await window.ethereum.request({
                             method: 'wallet_addEthereumChain',
-                            params: [
-                                {
-                                    chainId: ethers.utils.hexValue(POLYGON_CHAIN_ID),
-                                    chainName: 'Polygon Mainnet',
-                                    nativeCurrency: {
-                                        name: 'MATIC',
-                                        symbol: 'MATIC',
-                                        decimals: 18
-                                    },
-                                    rpcUrls: ['https://polygon-rpc.com/'],
-                                    blockExplorerUrls: ['https://polygonscan.com/']
-                                }
-                            ]
+                            params: [{
+                                chainId: '0x89',
+                                chainName: 'Polygon Mainnet',
+                                nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
+                                rpcUrls: ['https://polygon-rpc.com/'],
+                                blockExplorerUrls: ['https://polygonscan.com/']
+                            }]
                         });
                     } else {
                         throw switchError;
                     }
                 }
             }
-            // 更新钱包信息显示
+
             function updateWalletInfo() {
-                // 隐藏未连接提示，显示钱包信息和个人信息
                 walletNotConnected.style.display = 'none';
                 profileInfo.style.display = 'block';
                 walletInfo.style.display = 'flex';
                 disconnectBtn.style.display = 'block';
-                // 更新钱包名称和地址（缩写地址，提升用户体验）
-                walletName.textContent = 'MetaMask'; // 暂时默认MetaMask，如需多钱包可扩展
                 const shortAddress = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
-                walletAddress.textContent = userAddress; // 完整地址用于复制
-                walletAddress.title = userAddress; // 鼠标悬浮显示完整地址
-                // 若要显示缩写地址，可替换为：walletAddress.textContent = shortAddress;
-                // 更新按钮状态
+                walletAddress.textContent = shortAddress;
+                walletAddress.setAttribute('title', userAddress);
                 connectWalletBtn.innerHTML = '<i class="fas fa-check"></i> 钱包已连接';
                 connectWalletBtn.style.background = 'linear-gradient(135deg, #4caf50, #81c784)';
             }
-            // 获取用户真实的个人数据（从区块链读取）
+
             async function getUserProfileData() {
                 if (!provider || !userAddress) return;
                 try {
-                    // 1. 初始化DC代币合约
-                    const dcContract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, provider);
-                    // 2. 并行获取数据
+                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, provider);
                     const [
                         balance,
                         decimals,
                         isVerified,
                         lastClaimTime
                     ] = await Promise.all([
-                        dcContract.balanceOf(userAddress),
-                        dcContract.decimals(),
-                        dcContract.verified(userAddress),
-                        dcContract.lastclaimtime(userAddress)
+                        contract.balanceOf(userAddress),
+                        contract.decimals(),
+                        contract.verified(userAddress),
+                        contract.lastclaimtime(userAddress)
                     ]);
-                    // 3. 格式化余额（除以10^decimals）
+
                     const formattedBalance = ethers.utils.formatUnits(balance, decimals);
-                    // 4. 更新代币余额
                     document.getElementById('tokenBalance').textContent = `${parseFloat(formattedBalance).toFixed(2)} DC`;
-                    // 5. 更新身份认证状态
-                    const verifyStatus = document.getElementById('verifyStatus');
+
+                    const verifyStatusEl = document.getElementById('verifyStatus');
                     if (isVerified) {
-                        verifyStatus.className = 'status positive';
-                        verifyStatus.textContent = '已认证';
+                        verifyStatusEl.className = 'status positive';
+                        verifyStatusEl.textContent = '已认证';
                     } else {
-                        verifyStatus.className = 'status negative';
-                        verifyStatus.textContent = '未认证';
+                        verifyStatusEl.className = 'status negative';
+                        verifyStatusEl.textContent = '未认证';
                     }
-                    // 6. 更新投票权状态（简化为：只有已认证才有投票权）
-                    const voteStatus = document.getElementById('voteStatus');
-                    if (isVerified) {
-                        voteStatus.className = 'status positive';
-                        voteStatus.textContent = '拥有投票权';
-                    } else {
-                        voteStatus.className = 'status negative';
-                        voteStatus.textContent = '无投票权';
-                    }
-                    // 7. 处理铸造状态逻辑
+
+                    document.getElementById('voteStatus').className = isVerified ? 'status positive' : 'status negative';
+                    document.getElementById('voteStatus').textContent = isVerified ? '拥有投票权' : '无投票权';
+
+                    // 处理铸造状态（仅展示，无按钮）
                     handleMintStatus(isVerified, lastClaimTime.toNumber());
+
                 } catch (error) {
                     console.error('获取用户数据失败：', error);
                     alert(`获取数据失败：${error.message}`);
                 }
             }
-            // 处理铸造状态逻辑（核心逻辑）
+
             function handleMintStatus(isVerified, lastClaimTimestamp) {
-                const now = Math.floor(Date.now() / 1000); // 当前时间戳（秒）
-                // 步骤1：身份未认证，直接显示不可铸造
-                if (!isVerified) {
-                    mintStatusContent.className = 'status negative';
-                    mintStatusContent.textContent = '身份未认证，不可铸造';
-                    // 清除可能存在的倒计时
-                    if (window.mintCountdownInterval) {
-                        clearInterval(window.mintCountdownInterval);
-                        window.mintCountdownInterval = null;
-                    }
-                    return;
-                }
-                // 步骤2：身份已认证，检查上次铸造时间
-                const nextClaimTimestamp = lastClaimTimestamp + CLAIM_COOLDOWN; // 下次可铸造时间戳
-                // 步骤3：如果当前时间 >= 下次铸造时间，显示“可铸造”
-                if (now >= nextClaimTimestamp) {
-                    mintStatusContent.className = 'status positive';
-                    mintStatusContent.textContent = '可铸造';
-                    // 清除倒计时
-                    if (window.mintCountdownInterval) {
-                        clearInterval(window.mintCountdownInterval);
-                        window.mintCountdownInterval = null;
-                    }
-                } else {
-                    // 步骤4：否则，计算倒计时并动态显示
-                    mintStatusContent.className = 'status neutral';
-                    updateMintCountdownDisplay(nextClaimTimestamp);
-                    // 启动倒计时
-                    if (window.mintCountdownInterval) {
-                        clearInterval(window.mintCountdownInterval);
-                    }
-                    window.mintCountdownInterval = setInterval(() => {
-                        const currentTime = Math.floor(Date.now() / 1000);
-                        if (currentTime >= nextClaimTimestamp) {
-                            mintStatusContent.className = 'status positive';
-                            mintStatusContent.textContent = '可铸造';
-                            if (window.mintCountdownInterval) {
-                                clearInterval(window.mintCountdownInterval);
-                                window.mintCountdownInterval = null;
-                            }
-                        } else {
-                            updateMintCountdownDisplay(nextClaimTimestamp);
-                        }
-                    }, 1000);
-                }
-            }
-            // 更新倒计时显示
-            function updateMintCountdownDisplay(nextClaimTimestamp) {
+                const mintStatusEl = document.getElementById('mintStatus');
                 const now = Math.floor(Date.now() / 1000);
-                const diff = nextClaimTimestamp - now;
-                if (diff <= 0) {
-                    mintStatusContent.className = 'status positive';
-                    mintStatusContent.textContent = '可铸造';
+
+                if (!isVerified) {
+                    mintStatusEl.className = 'status negative';
+                    mintStatusEl.textContent = '身份未认证，不可铸造';
                     return;
                 }
-                const hours = Math.floor(diff / 3600);
-                const minutes = Math.floor((diff % 3600) / 60);
-                const seconds = diff % 60;
-                mintStatusContent.textContent = `可铸造还需 ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+                const nextClaimTime = lastClaimTimestamp + CLAIM_COOLDOWN;
+                if (now >= nextClaimTime) {
+                    mintStatusEl.className = 'status positive';
+                    mintStatusEl.textContent = '可铸造（请通过区块链浏览器交互）';
+                } else {
+                    const diff = nextClaimTime - now;
+                    const hours = Math.floor(diff / 3600);
+                    const minutes = Math.floor((diff % 3600) / 60);
+                    const seconds = diff % 60;
+                    mintStatusEl.className = 'status neutral';
+                    mintStatusEl.textContent = `下次铸造：${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
             }
-            // 监听钱包账户变化
+
             window.ethereum?.on('accountsChanged', (accounts) => {
                 if (accounts.length > 0) {
                     userAddress = accounts[0];
                     updateWalletInfo();
                     getUserProfileData();
                 } else {
-                    // 用户移除了账户授权，断开连接
                     disconnectBtn.click();
                 }
             });
-            // 监听钱包链变化
+
             window.ethereum?.on('chainChanged', (chainId) => {
                 if (parseInt(chainId, 16) !== POLYGON_CHAIN_ID) {
-                    alert('请切换到Polygon主网！');
+                    alert('请切换到 Polygon 主网！');
                     disconnectBtn.click();
                 } else {
-                    // 切换回Polygon主网，重新获取数据
                     getUserProfileData();
                 }
             });
