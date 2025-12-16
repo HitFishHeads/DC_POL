@@ -400,6 +400,20 @@
             margin-bottom: 2rem;
             flex-wrap: wrap;
         }
+        .wallet-select {
+            padding: 1rem 1.2rem;
+            background: var(--bg-card);
+            border: 1px solid rgba(129, 199, 132, 0.1);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+        .wallet-select option {
+            background: var(--bg-dark);
+            color: #e0e0e0;
+        }
         .wallet-connect-btn {
             display: inline-block;
             padding: 1rem 2rem;
@@ -511,6 +525,29 @@
         .status.neutral {
             background: rgba(79, 195, 247, 0.1);
             color: var(--secondary-color);
+        }
+        .claim-btn {
+            margin-top: 1rem;
+            padding: 0.6rem 1.5rem;
+            background: linear-gradient(135deg, var(--sky-blue-1), var(--sky-blue-2));
+            color: #0a0a16;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .claim-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--sky-shadow);
+        }
+        .claim-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
         .copy-toast {
             position: fixed;
@@ -692,7 +729,7 @@
                         <div class="blocks-grid" style="margin-top: 1.5rem;">
                             <div class="block-card">
                                 <h4><i class="fas fa-coins"></i>每日铸造代币</h4>
-                                <p>每日可铸造<strong class="highlight">1000 DC代币</strong>（需间隔24小时，通过钱包直接调用<code class="code-inline">claim()</code>函数执行铸造）。</p>
+                                <p>每日可铸造<strong class="highlight">1000 DC代币</strong>（需间隔24小时，调用<code class="code-inline">claim()</code>函数执行铸造）。</p>
                             </div>
                             <div class="block-card">
                                 <h4><i class="fas fa-user-check"></i>成为验证者</h4>
@@ -747,11 +784,16 @@
                     <section class="section">
                         <h2>个人信息中心</h2>
                         <div class="wallet-connect-area">
+                            <select class="wallet-select" id="walletSelect">
+                                <option value="">请选择钱包</option>
+                                <option value="metamask">MetaMask</option>
+                                <option value="okx">OKX Wallet</option>
+                            </select>
                             <button class="wallet-connect-btn" id="connectWalletBtn">
-                                <i class="fas fa-link"></i> 连接Polygon钱包
+                                <i class="fas fa-link"></i> <span id="connectBtnText">连接 Polygon 钱包</span>
                             </button>
                             <div class="wallet-info" id="walletInfo" style="display: none;">
-                                <span class="wallet-name" id="walletName">MetaMask</span>
+                                <span class="wallet-name" id="walletName">钱包</span>
                                 <div class="wallet-address">
                                     <span class="address-text" id="walletAddress">0x...</span>
                                     <button class="copy-btn" id="copyBtn" title="复制地址">
@@ -779,11 +821,55 @@
                                 <div class="info-card">
                                     <h4><i class="fas fa-vote-yea"></i> 投票权状态</h4>
                                     <p>当前状态：<span id="voteStatus" class="status negative">无投票权</span></p>
+                                    <p>7天最低余额：<span id="minBalance">--</span> DC</p>
                                 </div>
                                 <div class="info-card">
-                                    <h4><i class="fas fa-hammer"></i> 铸造代币权限</h4>
-                                    <p>当前状态：<span id="mintStatus" class="mint-status-content">-</span></p>
+                                    <h4><i class="fas fa-hammer"></i> 铸造代币板块</h4>
+                                    <div id="mintStatusBlock"></div>
                                 </div>
+                            </div>
+
+                            <!-- 提交身份认证板块 -->
+                            <div class="section" id="applySection" style="margin-top: 2rem; display: none;">
+                                <h3> 提交身份认证申请</h3>
+                                <p>需消耗 <strong class="highlight">5000 DC</strong>，提交一个证明你身份的视频或文件链接。</p>
+                                <input type="url" id="identityURL" placeholder="请输入身份证明文件的公开URL（如 Google Drive、IPFS 等）" style="width: 100%; padding: 0.8rem; margin: 1rem 0; background: var(--bg-card); color: #e0e0e0; border: 1px solid rgba(129,199,132,0.1); border-radius: 6px;">
+                                <button class="claim-btn" id="applyBtn" style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
+                                    <i class="fas fa-file-upload"></i> 提交身份认证
+                                </button>
+                                <div id="applyStatus" style="margin-top: 1rem;"></div>
+                            </div>
+
+                            <!-- 获取投票权板块 -->
+                            <div class="section" id="voterSection" style="display: none;">
+                                <h3>获取投票权（成为验证者）</h3>
+                                <p>验证者可审核他人身份申请。需满足：<br>✅ 已认证身份 &nbsp; ✅ 7天最低余额足够高</p>
+                                <button class="claim-btn" id="becomeVoterBtn" style="background: linear-gradient(135deg, #9c27b0, #e040fb);">
+                                    <i class="fas fa-user-shield"></i> 申请成为验证者
+                                </button>
+                                <div id="voterStatus" style="margin-top: 1rem;"></div>
+                            </div>
+
+                            <!-- 参与投票 -->
+                            <div class="section">
+                                <h3>参与投票（审核身份申请）</h3>
+                                <div id="pendingApplication" style="margin-top: 1rem;"></div>
+                            </div>
+
+                            <!-- 我的投票进度 -->
+                            <div class="section">
+                                <h3> 我的投票进度</h3>
+                                <div id="myVoteProgress" style="margin-top: 1rem;"></div>
+                            </div>
+
+                            <!-- 领取投票奖励 -->
+                            <div class="section">
+                                <h3> 领取投票奖励</h3>
+                                <p>投票结果一致可领取 <strong class="highlight">2000 DC</strong> 奖励。</p>
+                                <button class="claim-btn" id="claimRewardBtn" style="background: linear-gradient(135deg, #00bcd4, #80deea);">
+                                    <i class="fas fa-gift"></i> 领取投票奖励
+                                </button>
+                                <div id="rewardStatus" style="margin-top: 1rem;"></div>
                             </div>
                         </div>
                     </section>
@@ -794,7 +880,7 @@
     <div class="copy-toast" id="copyToast">地址复制成功！</div>
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
-            // ====================== Canvas 动画（保留）======================
+            // ========== Canvas 动画 ==========
             const canvas = document.getElementById('networkCanvas');
             const ctx = canvas.getContext('2d');
             function resizeCanvas() {
@@ -924,7 +1010,7 @@
             resizeCanvas();
             animate();
 
-            // ====================== 分页切换 ======================
+            // ========== 页面切换 ==========
             const navLinks = document.querySelectorAll('.nav-link');
             const pages = document.querySelectorAll('.page');
             navLinks.forEach(link => {
@@ -938,27 +1024,49 @@
                 });
             });
 
-            // ====================== 钱包连接与状态读取（无铸造交互）======================
+            // ========== 钱包与合约逻辑 ==========
             let provider = null;
+            let signer = null;
             let userAddress = null;
+            let currentWallet = null;
             const DC_CONTRACT_ADDRESS = '0x8Cb3bA05Efa695799E1cF0A2d2921e2387CbFB2C';
             const DC_CONTRACT_ABI = [
                 'function balanceOf(address) view returns (uint256)',
                 'function decimals() view returns (uint8)',
                 'function verified(address) view returns (bool)',
-                'function lastclaimtime(address) view returns (uint256)'
+                'function lastclaimtime(address) view returns (uint256)',
+                'function claim()',
+                'function minbalanceOf(address) view returns (uint256)',
+                'function voter(address) view returns (bool)',
+                'function refreshapplicants() view returns (uint256)',
+                'function get_address_from_applylist(uint256) view returns (address)',
+                'function application_URL(address) view returns (string)',
+                'function agree(address) view returns (uint256)',
+                'function opposition(address) view returns (uint256)',
+                'function voting(address) view returns (bool)',
+                'function voteto(address) view returns (address)',
+                'function voteto_pass(address) view returns (bool)',
+                'function isappling(address) view returns (bool)',
+                'function application(string memory _URL)',
+                'function bevoter()',
+                'function vote(address _Address, bool approv)',
+                'function getrewards()'
             ];
             const POLYGON_CHAIN_ID = 137;
-            const CLAIM_COOLDOWN = 86400; // 24小时
+            const CLAIM_COOLDOWN = 86400;
 
+            const walletSelect = document.getElementById('walletSelect');
             const connectWalletBtn = document.getElementById('connectWalletBtn');
+            const connectBtnText = document.getElementById('connectBtnText');
             const walletNotConnected = document.getElementById('walletNotConnected');
             const profileInfo = document.getElementById('profileInfo');
             const walletInfo = document.getElementById('walletInfo');
+            const walletNameEl = document.getElementById('walletName');
             const walletAddress = document.getElementById('walletAddress');
             const copyBtn = document.getElementById('copyBtn');
             const disconnectBtn = document.getElementById('disconnectBtn');
             const copyToast = document.getElementById('copyToast');
+            const mintStatusBlock = document.getElementById('mintStatusBlock');
 
             if (typeof ethers === 'undefined') {
                 alert('ethers.js库加载失败，请检查网络！');
@@ -966,41 +1074,102 @@
                 return;
             }
 
-            if (window.ethereum) {
-                checkWalletConnection();
-            } else {
-                alert('请安装 MetaMask 等钱包插件！');
-                connectWalletBtn.disabled = true;
+            function getInjectedProvider(walletType) {
+                if (walletType === 'okx' && window.okxwallet) {
+                    return window.okxwallet;
+                } else if (walletType === 'metamask' && window.ethereum) {
+                    return window.ethereum;
+                } else if (!walletType && window.ethereum) {
+                    return window.ethereum;
+                }
+                return null;
+            }
+
+            async function switchToPolygonNetwork(providerInstance) {
+                try {
+                    await providerInstance.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: '0x89' }]
+                    });
+                } catch (switchError) {
+                    if (switchError.code === 4902) {
+                        await providerInstance.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: '0x89',
+                                chainName: 'Polygon Mainnet',
+                                nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
+                                rpcUrls: ['https://polygon-rpc.com/'],
+                                blockExplorerUrls: ['https://polygonscan.com/']
+                            }]
+                        });
+                    } else {
+                        throw switchError;
+                    }
+                }
             }
 
             connectWalletBtn.addEventListener('click', async () => {
-                if (!window.ethereum) return;
-                try {
-                    connectWalletBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 连接中...';
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    userAddress = accounts[0];
-                    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                    if (parseInt(chainId, 16) !== POLYGON_CHAIN_ID) {
-                        await switchToPolygonNetwork();
+                const selectedWallet = walletSelect.value;
+                if (!selectedWallet) {
+                    alert('请选择一个钱包类型');
+                    return;
+                }
+
+                const providerInstance = getInjectedProvider(selectedWallet);
+                if (!providerInstance) {
+                    if (selectedWallet === 'okx') {
+                        alert('请安装 OKX 钱包插件（https://www.okx.com/zh-hans/web3）');
+                    } else {
+                        alert('请安装 MetaMask 钱包插件');
                     }
-                    provider = new ethers.providers.Web3Provider(window.ethereum);
-                    updateWalletInfo();
+                    return;
+                }
+
+                try {
+                    connectBtnText.textContent = '连接中...';
+                    connectWalletBtn.disabled = true;
+
+                    const accounts = await providerInstance.request({ method: 'eth_requestAccounts' });
+                    userAddress = accounts[0];
+                    currentWallet = selectedWallet;
+
+                    const chainId = await providerInstance.request({ method: 'eth_chainId' });
+                    if (parseInt(chainId, 16) !== POLYGON_CHAIN_ID) {
+                        await switchToPolygonNetwork(providerInstance);
+                    }
+
+                    provider = new ethers.providers.Web3Provider(providerInstance);
+                    signer = provider.getSigner();
+
+                    updateWalletInfo(selectedWallet);
                     await getUserProfileData();
                 } catch (error) {
                     console.error('连接失败：', error);
-                    alert(`连接失败：${error.message}`);
-                    connectWalletBtn.innerHTML = '<i class="fas fa-link"></i> 连接Polygon钱包';
+                    alert(`连接失败：${error.message || '用户拒绝连接'}`);
+                    connectBtnText.textContent = '连接 Polygon 钱包';
+                    connectWalletBtn.disabled = false;
                 }
             });
 
             disconnectBtn.addEventListener('click', () => {
                 provider = null;
+                signer = null;
                 userAddress = null;
+                currentWallet = null;
                 walletInfo.style.display = 'none';
                 disconnectBtn.style.display = 'none';
                 profileInfo.style.display = 'none';
                 walletNotConnected.style.display = 'block';
-                connectWalletBtn.innerHTML = '<i class="fas fa-link"></i> 连接Polygon钱包';
+                connectBtnText.textContent = '连接 Polygon 钱包';
+                connectWalletBtn.disabled = false;
+                walletSelect.value = '';
+                mintStatusBlock.innerHTML = '';
+                document.getElementById('applyStatus').innerHTML = '';
+                document.getElementById('voterStatus').innerHTML = '';
+                document.getElementById('pendingApplication').innerHTML = '';
+                document.getElementById('myVoteProgress').innerHTML = '';
+                document.getElementById('rewardStatus').innerHTML = '';
                 if (window.mintCountdownInterval) {
                     clearInterval(window.mintCountdownInterval);
                     window.mintCountdownInterval = null;
@@ -1018,58 +1187,20 @@
                 }
             });
 
-            async function checkWalletConnection() {
-                try {
-                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                    if (accounts.length > 0) {
-                        userAddress = accounts[0];
-                        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                        if (parseInt(chainId, 16) !== POLYGON_CHAIN_ID) {
-                            alert('请将钱包切换到 Polygon 主网！');
-                            return;
-                        }
-                        provider = new ethers.providers.Web3Provider(window.ethereum);
-                        updateWalletInfo();
-                        await getUserProfileData();
-                    }
-                } catch (error) {
-                    console.error('检查连接失败：', error);
-                }
-            }
-
-            async function switchToPolygonNetwork() {
-                try {
-                    await window.ethereum.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: '0x89' }]
-                    });
-                } catch (switchError) {
-                    if (switchError.code === 4902) {
-                        await window.ethereum.request({
-                            method: 'wallet_addEthereumChain',
-                            params: [{
-                                chainId: '0x89',
-                                chainName: 'Polygon Mainnet',
-                                nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
-                                rpcUrls: ['https://polygon-rpc.com/'],
-                                blockExplorerUrls: ['https://polygonscan.com/']
-                            }]
-                        });
-                    } else {
-                        throw switchError;
-                    }
-                }
-            }
-
-            function updateWalletInfo() {
+            function updateWalletInfo(walletType) {
                 walletNotConnected.style.display = 'none';
                 profileInfo.style.display = 'block';
                 walletInfo.style.display = 'flex';
                 disconnectBtn.style.display = 'block';
+
+                const walletNames = { metamask: 'MetaMask', okx: 'OKX Wallet' };
+                const walletName = walletNames[walletType] || '钱包';
+                walletNameEl.textContent = walletName;
+
                 const shortAddress = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
                 walletAddress.textContent = shortAddress;
                 walletAddress.setAttribute('title', userAddress);
-                connectWalletBtn.innerHTML = '<i class="fas fa-check"></i> 钱包已连接';
+                connectBtnText.textContent = '钱包已连接';
                 connectWalletBtn.style.background = 'linear-gradient(135deg, #4caf50, #81c784)';
             }
 
@@ -1081,12 +1212,18 @@
                         balance,
                         decimals,
                         isVerified,
-                        lastClaimTime
+                        lastClaimTime,
+                        minBalance,
+                        isVoter,
+                        isApplying
                     ] = await Promise.all([
                         contract.balanceOf(userAddress),
                         contract.decimals(),
                         contract.verified(userAddress),
-                        contract.lastclaimtime(userAddress)
+                        contract.lastclaimtime(userAddress),
+                        contract.minbalanceOf(userAddress),
+                        contract.voter(userAddress),
+                        contract.isappling(userAddress)
                     ]);
 
                     const formattedBalance = ethers.utils.formatUnits(balance, decimals);
@@ -1096,63 +1233,315 @@
                     if (isVerified) {
                         verifyStatusEl.className = 'status positive';
                         verifyStatusEl.textContent = '已认证';
+                        document.getElementById('applySection').style.display = 'none';
+                    } else if (isApplying) {
+                        verifyStatusEl.className = 'status neutral';
+                        verifyStatusEl.textContent = '认证中';
+                        document.getElementById('applySection').style.display = 'none';
                     } else {
                         verifyStatusEl.className = 'status negative';
                         verifyStatusEl.textContent = '未认证';
+                        document.getElementById('applySection').style.display = 'block';
                     }
 
-                    document.getElementById('voteStatus').className = isVerified ? 'status positive' : 'status negative';
-                    document.getElementById('voteStatus').textContent = isVerified ? '拥有投票权' : '无投票权';
+                    const voteStatusEl = document.getElementById('voteStatus');
+                    if (isVoter) {
+                        voteStatusEl.className = 'status positive';
+                        voteStatusEl.textContent = '拥有投票权';
+                        document.getElementById('voterSection').style.display = 'none';
+                    } else {
+                        voteStatusEl.className = 'status negative';
+                        voteStatusEl.textContent = '无投票权';
+                        document.getElementById('voterSection').style.display = 'block';
+                    }
 
-                    // 处理铸造状态（仅展示，无按钮）
-                    handleMintStatus(isVerified, lastClaimTime.toNumber());
+                    document.getElementById('minBalance').textContent = (parseFloat(ethers.utils.formatUnits(minBalance, decimals)) || 0).toFixed(2);
 
+                    await handleMintStatus(isVerified, lastClaimTime.toNumber(), contract);
+                    await loadPendingApplication();
+                    await loadMyVoteProgress();
                 } catch (error) {
                     console.error('获取用户数据失败：', error);
                     alert(`获取数据失败：${error.message}`);
                 }
             }
 
-            function handleMintStatus(isVerified, lastClaimTimestamp) {
-                const mintStatusEl = document.getElementById('mintStatus');
+            async function handleMintStatus(isVerified, lastClaimTimestamp, contract) {
                 const now = Math.floor(Date.now() / 1000);
-
+                let htmlContent = '';
                 if (!isVerified) {
-                    mintStatusEl.className = 'status negative';
-                    mintStatusEl.textContent = '身份未认证，不可铸造';
+                    htmlContent = '<span class="status negative">身份未认证，不可铸造</span>';
+                    mintStatusBlock.innerHTML = htmlContent;
+                    if (window.mintCountdownInterval) {
+                        clearInterval(window.mintCountdownInterval);
+                        window.mintCountdownInterval = null;
+                    }
                     return;
                 }
-
-                const nextClaimTime = lastClaimTimestamp + CLAIM_COOLDOWN;
-                if (now >= nextClaimTime) {
-                    mintStatusEl.className = 'status positive';
-                    mintStatusEl.textContent = '可铸造（请通过区块链浏览器交互）';
+                const nextClaimTimestamp = lastClaimTimestamp + CLAIM_COOLDOWN;
+                if (now >= nextClaimTimestamp) {
+                    htmlContent = `
+                        <span class="status positive">可铸造</span>
+                        <button class="claim-btn" id="claimBtn">
+                            <i class="fas fa-coins"></i> 铸造 1000 DC
+                        </button>
+                    `;
+                    mintStatusBlock.innerHTML = htmlContent;
+                    document.getElementById('claimBtn').addEventListener('click', () => claimTokens(contract));
                 } else {
-                    const diff = nextClaimTime - now;
-                    const hours = Math.floor(diff / 3600);
-                    const minutes = Math.floor((diff % 3600) / 60);
-                    const seconds = diff % 60;
-                    mintStatusEl.className = 'status neutral';
-                    mintStatusEl.textContent = `下次铸造：${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    htmlContent = `
+                        <span class="status neutral" id="countdownText">计算中...</span>
+                    `;
+                    mintStatusBlock.innerHTML = htmlContent;
+                    updateMintCountdownDisplay(nextClaimTimestamp);
+                    if (window.mintCountdownInterval) clearInterval(window.mintCountdownInterval);
+                    window.mintCountdownInterval = setInterval(() => {
+                        const currentTime = Math.floor(Date.now() / 1000);
+                        if (currentTime >= nextClaimTimestamp) {
+                            getUserProfileData();
+                        } else {
+                            updateMintCountdownDisplay(nextClaimTimestamp);
+                        }
+                    }, 1000);
                 }
             }
 
-            window.ethereum?.on('accountsChanged', (accounts) => {
-                if (accounts.length > 0) {
-                    userAddress = accounts[0];
-                    updateWalletInfo();
+            function updateMintCountdownDisplay(nextClaimTimestamp) {
+                const now = Math.floor(Date.now() / 1000);
+                const diff = nextClaimTimestamp - now;
+                if (diff <= 0) {
+                    mintStatusBlock.innerHTML = '<span class="status neutral">即将可铸造</span>';
+                    return;
+                }
+                const hours = Math.floor(diff / 3600);
+                const minutes = Math.floor((diff % 3600) / 60);
+                const seconds = diff % 60;
+                const countdownText = document.getElementById('countdownText');
+                if (countdownText) {
+                    countdownText.textContent = `可铸造还需 ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
+            }
+
+            async function claimTokens(contract) {
+                try {
+                    const claimBtn = document.getElementById('claimBtn');
+                    if (!claimBtn) return;
+                    claimBtn.disabled = true;
+                    claimBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 铸造中...';
+                    const gasLimit = 1500000;
+                    const feeData = await provider.getFeeData();
+                    const tx = await contract.connect(signer).claim({
+                        gasLimit: gasLimit,
+                        ...(feeData.maxFeePerGas ? {
+                            maxFeePerGas: feeData.maxFeePerGas,
+                            maxPriorityFeePerGas: feeData.maxPriorityFeePerGas || ethers.utils.parseUnits("20", "gwei")
+                        } : {
+                            gasPrice: feeData.gasPrice || ethers.utils.parseUnits("20", "gwei")
+                        })
+                    });
+                    await tx.wait();
+                    alert('✅ 铸造成功！已领取 1000 DC。');
+                    await getUserProfileData();
+                } catch (error) {
+                    console.error('铸造失败:', error);
+                    if (error.code === 'ACTION_REJECTED') {
+                        alert('❌ 您取消了交易。');
+                    } else if (error.code === 'INSUFFICIENT_FUNDS') {
+                        alert('❌ Gas 费不足，请确保钱包有足够 MATIC。');
+                    } else {
+                        alert(`❌ 铸造失败：${error.reason || error.message || '未知错误'}`);
+                    }
+                    const btn = document.getElementById('claimBtn');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-coins"></i> 铸造 1000 DC';
+                    }
+                }
+            }
+
+            // ========== 新增功能 ==========
+            document.getElementById('applyBtn')?.addEventListener('click', async () => {
+                const url = document.getElementById('identityURL').value.trim();
+                if (!url) {
+                    alert('请输入有效的身份证明URL');
+                    return;
+                }
+                if (!provider || !signer || !userAddress) {
+                    alert('请先连接钱包');
+                    return;
+                }
+                try {
+                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, signer);
+                    const tx = await contract.application(url);
+                    document.getElementById('applyStatus').innerHTML = '<span class="status neutral">提交中...请等待交易确认</span>';
+                    await tx.wait();
+                    document.getElementById('applyStatus').innerHTML = '<span class="status positive">✅ 身份认证申请已提交！</span>';
                     getUserProfileData();
-                } else {
-                    disconnectBtn.click();
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById('applyStatus').innerHTML = `<span class="status negative">❌ 提交失败：${err.reason || err.message}</span>`;
                 }
             });
 
-            window.ethereum?.on('chainChanged', (chainId) => {
-                if (parseInt(chainId, 16) !== POLYGON_CHAIN_ID) {
-                    alert('请切换到 Polygon 主网！');
-                    disconnectBtn.click();
-                } else {
+            document.getElementById('becomeVoterBtn')?.addEventListener('click', async () => {
+                if (!provider || !signer || !userAddress) return;
+                try {
+                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, signer);
+                    const tx = await contract.bevoter();
+                    document.getElementById('voterStatus').innerHTML = '<span class="status neutral">申请中...</span>';
+                    await tx.wait();
+                    document.getElementById('voterStatus').innerHTML = '<span class="status positive">✅ 已成为验证者！</span>';
                     getUserProfileData();
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById('voterStatus').innerHTML = `<span class="status negative">❌ 申请失败：${err.reason || err.message}</span>`;
+                }
+            });
+
+            async function loadPendingApplication() {
+                if (!provider || !userAddress) return;
+                try {
+                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, provider);
+                    const count = await contract.refreshapplicants();
+                    if (count.toNumber() === 0) {
+                        document.getElementById('pendingApplication').innerHTML = '<p>暂无待审核的身份申请。</p>';
+                        return;
+                    }
+                    const firstApplicant = await contract.get_address_from_applylist(0);
+                    const url = await contract.application_URL(firstApplicant);
+                    const agree = await contract.agree(firstApplicant);
+                    const oppose = await contract.opposition(firstApplicant);
+                    const total = agree.add(oppose).toNumber();
+
+                    let html = `<p><strong>申请人地址：</strong>${firstApplicant}</p>`;
+                    html += `<p><strong>身份证明链接：</strong><a href="${url}" target="_blank" style="color:var(--accent-color);">${url || '无'}</a></p>`;
+                    html += `<p><strong>当前投票：</strong>同意 ${agree.toNumber()} 票，反对 ${oppose.toNumber()} 票（共 ${total} 票）</p>`;
+
+                    if (total < 100) {
+                        const isVoter = await contract.voter(userAddress);
+                        const isVerified = await contract.verified(userAddress);
+                        if (isVoter && isVerified) {
+                            html += `<button class="claim-btn" id="voteApproveBtn" data-addr="${firstApplicant}" style="margin-right:1rem;">同意</button>`;
+                            html += `<button class="claim-btn" id="voteRejectBtn" data-addr="${firstApplicant}" style="background:linear-gradient(135deg, #f44336, #ff8a80);">反对</button>`;
+                        } else {
+                            html += `<p class="status neutral">您需要成为验证者并完成身份认证才能投票。</p>`;
+                        }
+                    } else {
+                        html += `<p class="status neutral">该申请已结束投票。</p>`;
+                    }
+                    document.getElementById('pendingApplication').innerHTML = html;
+
+                    document.getElementById('voteApproveBtn')?.addEventListener('click', () => castVote(firstApplicant, true));
+                    document.getElementById('voteRejectBtn')?.addEventListener('click', () => castVote(firstApplicant, false));
+                } catch (err) {
+                    console.error('加载申请失败:', err);
+                    document.getElementById('pendingApplication').innerHTML = `<p class="status negative">加载失败：${err.message}</p>`;
+                }
+            }
+
+            async function castVote(target, approve) {
+                if (!signer) return;
+                try {
+                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, signer);
+                    const tx = await contract.vote(target, approve);
+                    alert(`正在提交${approve ? '同意' : '反对'}票...`);
+                    await tx.wait();
+                    alert('投票成功！');
+                    loadPendingApplication();
+                    loadMyVoteProgress();
+                } catch (err) {
+                    console.error(err);
+                    alert(`投票失败：${err.reason || err.message}`);
+                }
+            }
+
+            async function loadMyVoteProgress() {
+                if (!provider || !userAddress) return;
+                try {
+                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, provider);
+                    const isVoting = await contract.voting(userAddress);
+                    if (!isVoting) {
+                        document.getElementById('myVoteProgress').innerHTML = '<p>您当前未参与投票。</p>';
+                        return;
+                    }
+                    const target = await contract.voteto(userAddress);
+                    const myVote = await contract.voteto_pass(userAddress);
+                    const agree = await contract.agree(target);
+                    const oppose = await contract.opposition(target);
+                    const total = agree.add(oppose).toNumber();
+                    const isApplying = await contract.isappling(target);
+
+                    let html = `<p>您正在对 <strong>${target}</strong> 进行投票</p>`;
+                    html += `<p>您的投票：${myVote ? '同意' : '反对'}</p>`;
+                    html += `<p>当前票数：同意 ${agree.toNumber()}，反对 ${oppose.toNumber()}（共 ${total} 票）</p>`;
+                    if (!isApplying || total >= 100) {
+                        html += `<p class="status positive">投票已结束！</p>`;
+                    }
+                    document.getElementById('myVoteProgress').innerHTML = html;
+                } catch (err) {
+                    console.error('加载投票进度失败:', err);
+                    document.getElementById('myVoteProgress').innerHTML = `<p class="status negative">加载失败：${err.message}</p>`;
+                }
+            }
+
+            document.getElementById('claimRewardBtn')?.addEventListener('click', async () => {
+                if (!provider || !signer || !userAddress) return;
+                try {
+                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, signer);
+                    const tx = await contract.getrewards();
+                    document.getElementById('rewardStatus').innerHTML = '<span class="status neutral">领取中...</span>';
+                    await tx.wait();
+                    document.getElementById('rewardStatus').innerHTML = '<span class="status positive">✅ 奖励已领取！</span>';
+                    getUserProfileData();
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById('rewardStatus').innerHTML = `<span class="status negative">❌ 领取失败：${err.reason || err.message}</span>`;
+                }
+            });
+
+            // ========== 自动检测已连接钱包 ==========
+            if (window.ethereum) {
+                window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
+                    if (accounts.length > 0) {
+                        window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
+                            if (parseInt(chainId, 16) === POLYGON_CHAIN_ID) {
+                                provider = new ethers.providers.Web3Provider(window.ethereum);
+                                signer = provider.getSigner();
+                                userAddress = accounts[0];
+                                currentWallet = 'metamask';
+                                updateWalletInfo('metamask');
+                                walletSelect.value = 'metamask';
+                                getUserProfileData();
+                            }
+                        }).catch(console.error);
+                    }
+                }).catch(console.error);
+            }
+
+            // ========== 钱包事件监听 ==========
+            currentProviderInstance = null;
+            connectWalletBtn.addEventListener('click', async () => {
+                const selectedWallet = walletSelect.value;
+                const providerInstance = getInjectedProvider(selectedWallet);
+                if (providerInstance && !currentProviderInstance) {
+                    currentProviderInstance = providerInstance;
+                    providerInstance.on('accountsChanged', (accounts) => {
+                        if (accounts.length > 0 && accounts[0] !== userAddress) {
+                            userAddress = accounts[0];
+                            updateWalletInfo(currentWallet);
+                            getUserProfileData();
+                        } else {
+                            disconnectBtn.click();
+                        }
+                    });
+                    providerInstance.on('chainChanged', (chainId) => {
+                        if (parseInt(chainId, 16) !== POLYGON_CHAIN_ID) {
+                            alert('请切换到 Polygon 主网！');
+                            disconnectBtn.click();
+                        } else {
+                            getUserProfileData();
+                        }
+                    });
                 }
             });
         });
