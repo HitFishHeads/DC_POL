@@ -1,0 +1,364 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.26;
+
+contract DCToken {
+    string public name = "DeCurrency";//货币全称民主货币/个人主权货币
+    string public symbol = "DC"; //货币符号
+   
+    mapping(address => uint256) public balanceOf; //账户余额
+    mapping(address => uint256) public minbalanceOf; //7天最小账户余额
+    mapping(address => uint) public  minbalancetime; //余额最小时间
+    mapping(address => bool) public verified;//身份是否验证
+    mapping(address => uint) public lastverifiedtime;//上次认证时间
+    mapping(address => bool) public voter;//是否成为了投票者
+    mapping(address => uint) public lastclaimtime;//上次领取空投时间
+    mapping(address => string) public application_URL;//申请认证证明网络地址
+    mapping(address => bool) public isappling;//是否在申请认证中
+    mapping(address => uint) public agree;//投票同意人数
+    mapping(address => uint) public opposition;//投票反对人数
+    mapping(address => uint) public lastvotetime;//验证者上次投票时间
+    mapping(address => uint) public bevotertime;//成为验证者时间
+    mapping(address=>address) public voteto;//投票给了谁
+    mapping(address=>bool) public voteto_pass;//投票的什么票
+    mapping(address=>bool) public voting;//验证者是否在投票中
+    mapping(address => uint) public lastdectime;//上次衰减时间
+    mapping(address => mapping(address => uint256)) public allowance; // 授权额度
+     
+    address[] private applyList;
+    address[200] public voterList; // 投票者列表
+    bool private locked; // 非重入锁
+    uint private  dectime = 0;
+    uint private dec = 3;// 账户资金衰减：1 个月减少千分之3
+    uint private declong = 3600*24*30;//系统代币衰减周期30天
+    uint private voterouttime = 3600*24*7;//7天不投票可被挤出投票队列
+    uint private minbalance_time = 3600*24*7;//最小余额统计天数 7天
+    uint private verify_outtime = 3600*24*365;//身份过期时间 1年
+    uint public whitelist=10000;//白名单个数，构建初始社区，运作起来后会弃权掉剩下的白名单
+    address private creater;
+    uint8 public decimals = 2; // 设定代币的小数位
+    
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+    
+    modifier nonReentrant() {
+        require(!locked, "Reentrancy detected");
+        locked = true;
+        _;
+        locked = false;
+    }
+    constructor() {
+        balanceOf[msg.sender] = 1000000*10**decimals;//创建者初始代币，用于建设初始社区
+        verified[msg.sender] = true;
+        application_URL[msg.sender]="whitelist";
+        lastverifiedtime[msg.sender]=block.timestamp;  
+        dectime = block.timestamp;
+        creater=msg.sender;
+    }
+    //总量,此处统计的为前200个投票者拥有的代币总数
+    function totalSupply() public view returns (uint256) {
+        uint256 supply = 0;
+        for (uint256 i = 0; i < 200; i++) {
+            supply += balanceOf[voterList[i]];
+        }
+        return supply;
+    }
+    // 授权
+    function approve(address spender, uint256 value) external  returns (bool) {
+        require(spender != address(0), "Invalid address");
+
+        allowance[msg.sender][spender] = value;
+        emit Approval(msg.sender, spender, value);
+        return true;
+    }
+    // 增加授权额度
+    // function increaseAllowance(address spender, uint256 addedValue) external  returns (bool) {
+    //     require(spender != address(0), "Invalid address");
+
+    //     allowance[msg.sender][spender] += addedValue;
+    //     emit Approval(msg.sender, spender, allowance[msg.sender][spender]);
+    //     return true;
+    // }
+
+    // 减少授权额度
+    function decreaseAllowance(address spender, uint256 subtractedValue) external  returns (bool) {
+        require(spender != address(0), "Invalid address");
+        require(allowance[msg.sender][spender] >= subtractedValue, "Allowance<0");
+
+        allowance[msg.sender][spender] -= subtractedValue;
+        emit Approval(msg.sender, spender, allowance[msg.sender][spender]);
+        return true;
+    }
+
+    // 从某个地址转账到另一个地址
+    function transferFrom(address sender, address recipient, uint256 value) public nonReentrant returns (bool) {
+        require(sender != address(0), "Invalid address");
+        require(recipient != address(0), "Invalid address");
+        
+        
+        if (lastdectime[recipient] == 0) {
+            lastdectime[recipient] = dectime;
+        }
+        //检查衰减
+        decck(sender);
+        decck(recipient);
+        require(balanceOf[sender] >= value, "Insufficient balance");
+        require(allowance[sender][msg.sender] >= value, "Allowance exceeded");
+        balanceOf[sender] -= value;
+        minblancecheck(sender);
+        balanceOf[recipient] += value;
+        minblancecheck(recipient);
+        allowance[sender][msg.sender] -= value;
+
+        emit Transfer(sender, recipient, value);
+        return true;
+    }
+
+
+    //查询申请人个数
+    function refreshapplicants()public view returns(uint256)
+    {
+        return  applyList.length;
+    }
+   //刷新账户余额，账户余额衰减周期为1个月,每月衰减千分之3左右，一个月刷新一次就可以了
+    function refreshbalance() public nonReentrant{
+
+         if (lastdectime[msg.sender] == 0) {
+            lastdectime[msg.sender] = dectime;
+        }
+
+        decck(msg.sender);
+        minblancecheck(msg.sender);
+
+    }
+    //创建者验证
+    function whitevote(address _Address,bool approv)public nonReentrant{
+        require(msg.sender==creater, "not creater");
+        require(isappling[_Address], "Address  not  applicant");
+        require(whitelist>0, " whitelist=0");
+
+        verified[_Address] = approv;
+        isappling[_Address] = false;
+        lastverifiedtime[_Address] = block.timestamp;
+
+         for (uint i = 0; i < applyList.length; i++) {
+                if (applyList[i] == _Address) {
+                    applyList[i] = applyList[applyList.length - 1];
+                    applyList.pop();
+                    break;
+                }
+            }
+       whitelist--;
+    }
+    //丢弃创建者权限
+   function dropwhitelist()public nonReentrant{
+      require(msg.sender==creater, "Not creater");
+      require(whitelist>0, "whitelist=0");
+      whitelist=0;
+
+   }
+    //投票功能，100票决定是否通过
+    function vote(address _Address, bool approv) public nonReentrant{
+        require(voter[msg.sender], "Not voter");
+        require(voting[msg.sender] ==false, "in voting");
+        require(verified[msg.sender]);
+        decck(msg.sender);
+        require(balanceOf[msg.sender] >= 1000*10**decimals, "Coins<1000");
+        require(isappling[_Address]);
+        require(agree[_Address] + opposition[_Address] < 100, "tickets >100");
+        require(block.timestamp - lastvotetime[msg.sender] >= 300, "last voting < 5 minute");
+        //一年后个人身份失效，需要重新提交申身份认证申请
+        if(block.timestamp - lastverifiedtime[msg.sender] >= verify_outtime )
+        {
+            voter[msg.sender]=false;
+            verified[msg.sender] = false;
+        }
+        require(block.timestamp - lastverifiedtime[msg.sender] < verify_outtime  ,"Identity expired " );
+
+        if (approv) {
+            agree[_Address]++;
+            voteto_pass[msg.sender]=true;
+        } else {
+            opposition[_Address]++;
+            voteto_pass[msg.sender]=false;
+        }
+        
+        balanceOf[msg.sender] -= 1000*10**decimals;
+        minblancecheck(msg.sender);
+        voteto[msg.sender] = _Address;
+        voting[msg.sender] = true;
+        lastvotetime[msg.sender] = block.timestamp;
+        //验证个人身份
+        if (agree[_Address] + opposition[_Address] >= 100) {
+            if (agree[_Address] > opposition[_Address]) {
+                verified[_Address] = true;
+                
+                lastverifiedtime[_Address] = block.timestamp;
+            } else {
+                verified[_Address] = false;
+            }
+            isappling[_Address] = false;
+            for (uint i = 0; i < applyList.length; i++) {
+                if (applyList[i] == _Address) {
+                    applyList[i] = applyList[applyList.length - 1];
+                    applyList.pop();
+                    break;
+                }
+            }
+        }
+    }
+   //从申请列表中获取他们的地址，如果有5个人申请，那么输入参数就是0到4
+    function get_address_from_applylist(uint index) public view returns (address) {
+        require(index < applyList.length, " Out of bounds");
+        return applyList[index];
+    }
+   //获取验证者投票奖励,获胜将拿到 2000 DC,失败就会拿不到 DC
+    function getrewards() public nonReentrant {
+        require(voter[msg.sender], "Not voter");
+        require(voting[msg.sender], "No voting");
+        uint allvote=agree[voteto[msg.sender]] + opposition[voteto[msg.sender]];
+         if (isappling[voteto[msg.sender]] == false&&allvote< 100) {
+            voting[msg.sender] = false;
+            if(voteto_pass[msg.sender]==verified[voteto[msg.sender]])
+              {
+                balanceOf[msg.sender] += 2000*10**decimals;
+                minblancecheck(msg.sender);
+                }
+              return ;
+            }
+        require(allvote >= 100,"wait more vote");
+           
+             voting[msg.sender] = false;
+             if(voteto_pass[msg.sender]==verified[voteto[msg.sender]])
+               {
+                 balanceOf[msg.sender] += 2000*10**decimals;
+                 minblancecheck(msg.sender);
+               }       
+    }
+    //申请个人身份认证，需要输入证明自己身份的视频地址连接，供验证者查看验证 花费 5000 DC
+    function application(string memory _URL) public nonReentrant{
+        decck(msg.sender);
+        require(balanceOf[msg.sender] >= 5000*10**decimals, "Coins<5000");
+        require(verified[msg.sender] == false, "vertified");
+        require(applyList.length < 200, " applicants >200");
+        require(isappling[msg.sender] == false, "Applying");
+
+        balanceOf[msg.sender] -= 5000*10**decimals;
+        minblancecheck(msg.sender);
+        application_URL[msg.sender] = _URL;
+        applyList.push(msg.sender);
+        isappling[msg.sender] = true;
+        agree[msg.sender] = 0;
+        opposition[msg.sender] = 0;
+    }
+   //转账
+    function transfer(address to, uint256 value) public nonReentrant returns (bool){
+        if (block.timestamp - dectime >= declong) {
+            dectime = block.timestamp;
+        }
+
+        if (lastdectime[msg.sender] == 0) {
+            lastdectime[msg.sender] = dectime;
+        }
+
+        if (lastdectime[to] == 0) {
+            lastdectime[to] = dectime;
+        }
+
+        decck(msg.sender);
+
+        require(balanceOf[msg.sender] >= value, "Insufficient balance");
+        balanceOf[msg.sender] -= value;
+        minblancecheck(msg.sender);
+        balanceOf[to] += value;
+        minblancecheck(to);
+
+        emit Transfer(msg.sender, to, value);
+        return  true;
+    }
+    //领取每日空投 1000 DC
+    function claim() public nonReentrant{
+        require(verified[msg.sender], "not verified");
+        require(block.timestamp - lastclaimtime[msg.sender] > 3600*24, "lastclaim < 1 day");
+
+        if (block.timestamp - lastverifiedtime[msg.sender] >= verify_outtime  && lastverifiedtime[msg.sender] != 0) {
+            verified[msg.sender] = false;
+             voter[msg.sender]=false;
+            return;
+        }
+
+        if (lastdectime[msg.sender] == 0) {
+            lastdectime[msg.sender] = dectime;
+        }
+
+       
+
+        decck(msg.sender);
+
+        balanceOf[msg.sender] += 1000*10**decimals;//单日可领取1000币
+        lastclaimtime[msg.sender] = block.timestamp;
+        minblancecheck(msg.sender);
+        
+    }
+   //成为验证者,需要比拼DC代币，超越验证者最低持有DC数量才可取代它
+    function bevoter() public nonReentrant {
+        require(verified[msg.sender], "Not verified");
+        require(voter[msg.sender] == false, "Already voter");
+        
+        for(uint i=0;i<200;i++)
+        {
+            if (voterList[i]==address(0))
+             {
+                voterList[i]=msg.sender;
+                voter[msg.sender] =true;
+                return;
+             }
+        }
+        minblancecheck(msg.sender);
+        for(uint i=0;i<200;i++)
+        {
+            if (minbalanceOf[msg.sender]>minbalanceOf[voterList[i]] || (block.timestamp-lastvotetime[voterList[i]]>voterouttime&&block.timestamp-bevotertime[voterList[i]]>3600))
+             {
+                
+                voter[voterList[i]]=false;
+                voterList[i]=msg.sender;
+                voter[msg.sender] =true;
+                bevotertime[msg.sender]=block.timestamp;
+                return;
+             }
+        }
+       
+    }
+    //衰减检查
+    function decck(address decadd) public{
+        if (lastdectime[decadd] == 0) {
+            lastdectime[decadd] = dectime;
+        }
+
+        
+
+        if (block.timestamp - dectime >= declong) {
+            dectime = block.timestamp;
+        }
+
+        if (lastdectime[decadd] < dectime) {
+            balanceOf[decadd] = balanceOf[decadd] * (1000 - (dec * (dectime - lastdectime[decadd]) / declong>1000?1000:dec * (dectime - lastdectime[decadd]) / declong)) / 1000;
+            lastdectime[decadd] = dectime;
+        }
+    }
+    //计算7天最小余额
+    function minblancecheck(address add) public  {
+       
+        if(balanceOf[add]<=minbalanceOf[add])
+            {
+                minbalanceOf[add]=balanceOf[add];
+                minbalancetime[add]=block.timestamp;
+                
+            }else{
+                 if(block.timestamp-minbalancetime[add] > minbalance_time)
+                    {
+                        minbalanceOf[add]=balanceOf[add];
+                        minbalancetime[add]=block.timestamp;
+                    }
+            } 
+    }
+}
