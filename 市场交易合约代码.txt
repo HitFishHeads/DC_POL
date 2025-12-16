@@ -1,0 +1,313 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.30;
+
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
+contract DCTradingMarket is ReentrancyGuard {
+    using SafeERC20 for IERC20;
+    
+    address public immutable DC_TOKEN = 0x8Cb3bA05Efa695799E1cF0A2d2921e2387CbFB2C;
+    
+    // 不再使用POL_TOKEN，因为POL就是MATIC（原生代币）
+    address public constant NATIVE_TOKEN = address(0); // 使用address(0)代表原生代币
+    uint256 public constant UNIT_SIZE_DC = 100_000; // 1000 * 1e2 (DC has 2 decimals)
+
+    enum OrderType { BUY, SELL }
+
+    struct Order {
+        address owner;
+        OrderType orderType;
+        uint256 dcAmount;      // total DC amount (base units)
+        uint256 pricePerUnit;  // MATIC (wei) per 1000 DC
+        uint256 filled;        // filled DC amount
+        bool active;
+    }
+
+    uint256 public nextOrderId = 1;
+    mapping(uint256 => Order) public orders;
+    mapping(address => uint256[]) public userOrders;
+
+    // 用户存款余额
+    mapping(address => uint256) public depositedDC; // DC存款
+    mapping(address => uint256) public depositedMATIC; // MATIC存款
+    
+    // 待领取收入
+    mapping(address => uint256) public pendingMATIC; // MATIC收入（来自卖单）
+    mapping(address => uint256) public pendingDC;  // DC收入（来自买单）
+
+    event OrderPlaced(uint256 indexed orderId, address indexed owner, OrderType orderType, uint256 dcAmount, uint256 pricePerUnit);
+    event OrderFilled(uint256 indexed orderId, address indexed taker, uint256 dcFilled, uint256 maticPaid);
+    event OrderCancelled(uint256 indexed orderId, address indexed owner, uint256 remainingDC, uint256 remainingMATIC);
+    event ProceedsClaimed(address indexed user, uint256 maticAmount, uint256 dcAmount);
+    event Deposited(address indexed user, address token, uint256 amount);
+    event Withdrawn(address indexed user, address token, uint256 amount);
+
+    // 存入DC代币
+    function depositDC(uint256 amount) external nonReentrant {
+        require(amount > 0, "Amount must be > 0");
+        
+        IERC20(DC_TOKEN).safeTransferFrom(msg.sender, address(this), amount);
+        depositedDC[msg.sender] += amount;
+        
+        emit Deposited(msg.sender, DC_TOKEN, amount);
+    }
+
+    // 存入MATIC（原生代币）
+    function depositMATIC() external payable nonReentrant {
+        require(msg.value > 0, "Amount must be > 0");
+        
+        depositedMATIC[msg.sender] += msg.value;
+        
+        emit Deposited(msg.sender, NATIVE_TOKEN, msg.value);
+    }
+
+    // 提取未使用的DC存款
+    function withdrawDC(uint256 amount) external nonReentrant {
+        require(amount > 0, "Amount must be > 0");
+        require(depositedDC[msg.sender] >= amount, "Insufficient DC balance");
+        
+        depositedDC[msg.sender] -= amount;
+        IERC20(DC_TOKEN).safeTransfer(msg.sender, amount);
+        
+        emit Withdrawn(msg.sender, DC_TOKEN, amount);
+    }
+
+    // 提取未使用的MATIC存款
+    function withdrawMATIC(uint256 amount) external nonReentrant {
+        require(amount > 0, "Amount must be > 0");
+        require(depositedMATIC[msg.sender] >= amount, "Insufficient MATIC balance");
+        
+        depositedMATIC[msg.sender] -= amount;
+        
+        // 使用call进行原生代币转账（避免gas限制）
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, "MATIC transfer failed");
+        
+        emit Withdrawn(msg.sender, NATIVE_TOKEN, amount);
+    }
+
+    // 下买单（用户存入MATIC，想要购买DC）
+    function placeBuyOrder(uint256 dcAmount, uint256 pricePerUnit) external nonReentrant {
+        _validateOrder(dcAmount, pricePerUnit);
+        require(pricePerUnit > 0, "Price must be > 0");
+
+        uint256 orderId = nextOrderId++;
+        uint256 maticRequired = (dcAmount / UNIT_SIZE_DC) * pricePerUnit;
+        
+        // 检查MATIC存款是否足够
+        require(depositedMATIC[msg.sender] >= maticRequired, "Insufficient MATIC deposited");
+        
+        // 锁定MATIC
+        depositedMATIC[msg.sender] -= maticRequired;
+
+        orders[orderId] = Order({
+            owner: msg.sender,
+            orderType: OrderType.BUY,
+            dcAmount: dcAmount,
+            pricePerUnit: pricePerUnit,
+            filled: 0,
+            active: true
+        });
+        userOrders[msg.sender].push(orderId);
+        
+        emit OrderPlaced(orderId, msg.sender, OrderType.BUY, dcAmount, pricePerUnit);
+    }
+
+    // 下卖单（用户存入DC，想要卖出换MATIC）
+    function placeSellOrder(uint256 dcAmount, uint256 pricePerUnit) external nonReentrant {
+        _validateOrder(dcAmount, pricePerUnit);
+        require(pricePerUnit > 0, "Price must be > 0");
+
+        uint256 orderId = nextOrderId++;
+        
+        // 检查DC存款是否足够
+        require(depositedDC[msg.sender] >= dcAmount, "Insufficient DC deposited");
+        
+        // 锁定DC
+        depositedDC[msg.sender] -= dcAmount;
+
+        orders[orderId] = Order({
+            owner: msg.sender,
+            orderType: OrderType.SELL,
+            dcAmount: dcAmount,
+            pricePerUnit: pricePerUnit,
+            filled: 0,
+            active: true
+        });
+        userOrders[msg.sender].push(orderId);
+        
+        emit OrderPlaced(orderId, msg.sender, OrderType.SELL, dcAmount, pricePerUnit);
+    }
+
+    // 成交订单（吃单）
+    function fillOrder(uint256 orderId, uint256 dcAmountToTake) external nonReentrant {
+        require(dcAmountToTake > 0, "Amount must be > 0");
+        require(dcAmountToTake % UNIT_SIZE_DC == 0, "DC amount must be multiple of 1000");
+
+        Order storage order = orders[orderId];
+        require(order.active, "Order inactive");
+        require(order.owner != msg.sender, "Cannot fill own order");
+
+        uint256 remaining = order.dcAmount - order.filled;
+        require(dcAmountToTake <= remaining, "Exceeds remaining amount");
+
+        uint256 maticToPay = (dcAmountToTake / UNIT_SIZE_DC) * order.pricePerUnit;
+
+        if (order.orderType == OrderType.SELL) {
+            // 吃单者买入DC，支付MATIC给合约，获得DC
+            // 检查吃单者的MATIC存款是否足够
+            require(depositedMATIC[msg.sender] >= maticToPay, "Insufficient MATIC balance");
+            
+            // 从吃单者扣除MATIC，给卖单者增加待领取MATIC
+            depositedMATIC[msg.sender] -= maticToPay;
+            pendingMATIC[order.owner] += maticToPay;
+            
+            // 从合约DC余额中转账给吃单者
+            IERC20(DC_TOKEN).safeTransfer(msg.sender, dcAmountToTake);
+        } else {
+            // 吃单者卖出DC，获得MATIC，支付DC给合约
+            // 检查吃单者的DC存款是否足够
+            require(depositedDC[msg.sender] >= dcAmountToTake, "Insufficient DC balance");
+            
+            // 从吃单者扣除DC，给买单者增加待领取DC
+            depositedDC[msg.sender] -= dcAmountToTake;
+            pendingDC[order.owner] += dcAmountToTake;
+            
+            // 从合约MATIC余额中转账给吃单者
+            (bool success, ) = msg.sender.call{value: maticToPay}("");
+            require(success, "MATIC transfer failed");
+        }
+
+        order.filled += dcAmountToTake;
+        if (order.filled == order.dcAmount) {
+            order.active = false;
+        }
+
+        emit OrderFilled(orderId, msg.sender, dcAmountToTake, maticToPay);
+    }
+
+    // 取消订单
+    function cancelOrder(uint256 orderId) external nonReentrant {
+        Order storage order = orders[orderId];
+        require(order.active, "Order not active");
+        require(order.owner == msg.sender, "Not your order");
+
+        uint256 remainingDC = order.dcAmount - order.filled;
+        uint256 remainingMATIC = 0;
+
+        if (order.orderType == OrderType.SELL) {
+            // 卖单：返还剩余的DC
+            if (remainingDC > 0) {
+                depositedDC[msg.sender] += remainingDC;
+            }
+        } else {
+            // 买单：返还剩余的MATIC
+            remainingMATIC = (remainingDC / UNIT_SIZE_DC) * order.pricePerUnit;
+            if (remainingMATIC > 0) {
+                depositedMATIC[msg.sender] += remainingMATIC;
+            }
+        }
+
+        order.active = false;
+        emit OrderCancelled(orderId, msg.sender, remainingDC, remainingMATIC);
+    }
+
+    // 领取所有待领取收入
+    function claimAll() external nonReentrant {
+        uint256 maticAmount = pendingMATIC[msg.sender];
+        uint256 dcAmount = pendingDC[msg.sender];
+
+        if (maticAmount > 0) {
+            pendingMATIC[msg.sender] = 0;
+            
+            // 使用call进行原生代币转账
+            (bool success, ) = msg.sender.call{value: maticAmount}("");
+            require(success, "MATIC transfer failed");
+        }
+
+        if (dcAmount > 0) {
+            pendingDC[msg.sender] = 0;
+            IERC20(DC_TOKEN).safeTransfer(msg.sender, dcAmount);
+        }
+
+        if (maticAmount > 0 || dcAmount > 0) {
+            emit ProceedsClaimed(msg.sender, maticAmount, dcAmount);
+        }
+    }
+
+    // 单独领取MATIC收入
+    function claimMATIC() external nonReentrant {
+        uint256 amount = pendingMATIC[msg.sender];
+        require(amount > 0, "No MATIC to claim");
+        
+        pendingMATIC[msg.sender] = 0;
+        
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, "MATIC transfer failed");
+        
+        emit ProceedsClaimed(msg.sender, amount, 0);
+    }
+
+    // 单独领取DC收入
+    function claimDC() external nonReentrant {
+        uint256 amount = pendingDC[msg.sender];
+        require(amount > 0, "No DC to claim");
+        
+        pendingDC[msg.sender] = 0;
+        IERC20(DC_TOKEN).safeTransfer(msg.sender, amount);
+        
+        emit ProceedsClaimed(msg.sender, 0, amount);
+    }
+
+    // 验证订单参数
+    function _validateOrder(uint256 dcAmount, uint256 pricePerUnit) internal pure {
+        require(dcAmount >= UNIT_SIZE_DC, "Min 1000 DC");
+        require(dcAmount % UNIT_SIZE_DC == 0, "Must be multiple of 1000 DC");
+        require(pricePerUnit > 0, "Price must be > 0");
+    }
+
+    // 查询用户订单ID列表
+    function getUserOrderIds(address user) external view returns (uint256[] memory) {
+        return userOrders[user];
+    }
+
+    // 查询订单详情
+    function getOrder(uint256 orderId) external view returns (
+        address owner,
+        OrderType orderType,
+        uint256 dcAmount,
+        uint256 pricePerUnit,
+        uint256 filled,
+        bool active
+    ) {
+        Order memory order = orders[orderId];
+        return (order.owner, order.orderType, order.dcAmount, order.pricePerUnit, order.filled, order.active);
+    }
+
+    // 查询用户存款余额
+    function getDepositedDC(address user) external view returns (uint256) {
+        return depositedDC[user];
+    }
+
+    function getDepositedMATIC(address user) external view returns (uint256) {
+        return depositedMATIC[user];
+    }
+
+    // 查询待领取收入
+    function getPendingMATIC(address user) external view returns (uint256) {
+        return pendingMATIC[user];
+    }
+
+    function getPendingDC(address user) external view returns (uint256) {
+        return pendingDC[user];
+    }
+
+    // 接收MATIC存款的回退函数
+    receive() external payable {
+        // 当直接发送MATIC到合约时，自动存入到发送者账户
+        depositedMATIC[msg.sender] += msg.value;
+        emit Deposited(msg.sender, NATIVE_TOKEN, msg.value);
+    }
+}
