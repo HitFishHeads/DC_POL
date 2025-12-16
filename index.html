@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeCurrency (DC) - 去中心化民主货币系统</title>
     <style>
+        /* ========== 所有原有 CSS 保持不变 ========== */
         * {
             margin: 0;
             padding: 0;
@@ -96,6 +97,97 @@
             background: linear-gradient(135deg, rgba(129, 199, 132, 0.15), rgba(160, 214, 160, 0.1));
             color: var(--primary-color);
             border-left: 3px solid var(--primary-color);
+        }
+        /* 全局钱包连接按钮 */
+        .global-wallet-connect {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .global-wallet-connect .wallet-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--bg-nav);
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid rgba(129, 199, 132, 0.1);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+        .global-wallet-connect .wallet-name {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .global-wallet-connect .wallet-address {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .global-wallet-connect .address-text {
+            color: #d0d0e0;
+            font-size: 0.9rem;
+        }
+        .global-wallet-connect .copy-btn {
+            background: transparent;
+            border: none;
+            color: var(--secondary-color);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        .global-wallet-connect .copy-btn:hover {
+            color: var(--sky-blue-1);
+        }
+        .global-wallet-connect .disconnect-btn {
+            padding: 0.6rem 1rem;
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .global-wallet-connect .disconnect-btn:hover {
+            background: rgba(244, 67, 54, 0.2);
+            transform: translateY(-2px);
+        }
+        .global-wallet-connect .wallet-connect-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: var(--bg-dark);
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .global-wallet-connect .wallet-connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+        .global-wallet-connect .wallet-select {
+            padding: 0.8rem 1rem;
+            background: var(--bg-nav);
+            border: 1px solid rgba(129, 199, 132, 0.1);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
         }
         #network-banner {
             position: relative;
@@ -567,6 +659,115 @@
             from { transform: translateX(20px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .order-table th, .order-table td {
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(129,199,132,0.1);
+        }
+        .order-table th {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        .order-row.sell { background: rgba(244,67,54,0.05); }
+        .order-row.buy { background: rgba(76,175,80,0.05); }
+        .order-action-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+        .order-action-btn.buy { background: rgba(76,175,80,0.2); color: #4caf50; }
+        .order-action-btn.sell { background: rgba(244,67,54,0.2); color: #f44336; }
+        .form-group {
+            margin: 1.5rem 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--bg-card);
+            color: #e0e0e0;
+            border: 1px solid rgba(129,199,132,0.1);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        .form-group .btn-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        /* 新增样式 */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .balance-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding: 0.5rem 0;
+        }
+        .error-message {
+            color: #f44336;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(244, 67, 54, 0.1);
+            border-radius: 6px;
+            border-left: 3px solid #f44336;
+        }
+        .success-message {
+            color: #4caf50;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 6px;
+            border-left: 3px solid #4caf50;
+        }
+        .wallet-not-connected {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(129, 199, 132, 0.1);
+            margin: 2rem 0;
+        }
+        .my-order-item {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            background: rgba(20, 20, 40, 0.5);
+            border-left: 3px solid;
+        }
+        .my-order-item.buy { border-left-color: #4caf50; }
+        .my-order-item.sell { border-left-color: #f44336; }
+        .order-status {
+            font-size: 0.9rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+        .order-status.active { background: rgba(76,175,80,0.2); color: #4caf50; }
+        .order-status.filled { background: rgba(33,150,243,0.2); color: #2196f3; }
+        .order-status.cancelled { background: rgba(244,67,54,0.2); color: #f44336; }
         @media (max-width: 1200px) {
             .sidebar { width: 250px; }
             .main-content { margin-left: 250px; }
@@ -584,7 +785,6 @@
                 border-bottom: 1px solid rgba(129, 199, 132, 0.1);
                 padding: 1rem 0;
             }
-            .logo { padding: 0 1rem 1rem; margin-bottom: 1rem; }
             .nav-list {
                 display: flex;
                 overflow-x: auto;
@@ -633,12 +833,47 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
+            .order-table { font-size: 0.9rem; }
+            .order-table th, .order-table td { padding: 0.5rem; }
+            .global-wallet-connect {
+                position: static;
+                margin: 1rem;
+                justify-content: center;
+            }
+            .global-wallet-connect .wallet-info {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 </head>
 <body>
+    <!-- 全局钱包连接 -->
+    <div class="global-wallet-connect">
+        <select class="wallet-select" id="globalWalletSelect">
+            <option value="">选择钱包</option>
+            <option value="metamask">MetaMask</option>
+            <option value="okx">OKX Wallet</option>
+        </select>
+        <button class="wallet-connect-btn" id="globalConnectWalletBtn">
+            <i class="fas fa-link"></i> <span>连接钱包</span>
+        </button>
+        <div class="wallet-info" id="globalWalletInfo" style="display: none;">
+            <span class="wallet-name" id="globalWalletName">钱包</span>
+            <div class="wallet-address">
+                <span class="address-text" id="globalWalletAddress">0x...</span>
+                <button class="copy-btn" id="globalCopyBtn" title="复制地址">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            <button class="disconnect-btn" id="globalDisconnectBtn">
+                <i class="fas fa-unlink"></i> 断开
+            </button>
+        </div>
+    </div>
     <div class="page-container">
         <aside class="sidebar">
             <div class="logo">
@@ -647,13 +882,17 @@
             </div>
             <ul class="nav-list">
                 <li class="nav-item">
-                    <a href="#concept-page" class="nav-link active" data-page="concept-page">核心理念</a>
+                    <a href="#concept-page" class="nav-link" data-page="concept-page">核心理念</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#participate-page" class="nav-link" data-page="participate-page">参与和治理</a>
+                    <a href="#participate-page" class="nav-link" data-page="participate-page">项目介绍</a>
                 </li>
+               
                 <li class="nav-item">
-                    <a href="#profile-page" class="nav-link" data-page="profile-page">个人信息</a>
+                    <a href="#profile-page" class="nav-link" data-page="profile-page">参与治理</a>
+                </li> 
+                <li class="nav-item">
+                    <a href="#market-page" class="nav-link" data-page="market-page">市场</a>
                 </li>
             </ul>
         </aside>
@@ -671,10 +910,117 @@
                 </div>
             </div>
             <div class="content-wrapper">
+                <!-- ========== 市场页面 ========== -->
+                <div id="market-page" class="page">
+                    <section class="section">
+                        <h2>DC/MATIC 交易市场</h2>
+                        <!-- 钱包未连接提示 -->
+                        <div id="marketWalletNotConnected" class="wallet-not-connected" style="display: none;">
+                            <p>请先连接钱包以查看余额、挂单和交易。</p>
+                        </div>
+                        <!-- 钱包已连接内容 -->
+                        <div id="marketConnectedPanel">
+                            <!-- 余额显示 -->
+                            <div class="info-grid">
+                                <div class="info-card">
+                                    <h4><i class="fas fa-coins"></i> DC 余额</h4>
+                                    <p id="marketDcBalance">0.00 DC</p>
+                                </div>
+                                <div class="info-card">
+                                    <h4><i class="fas fa-coins"></i> MATIC 余额</h4>
+                                    <p id="marketMaticBalance">0.00 MATIC</p>
+                                </div>
+                                <div class="info-card">
+                                    <h4><i class="fas fa-gift"></i> 待领取收入</h4>
+                                    <p>待领取DC: <span id="pendingDC">0</span></p>
+                                    <p>待领取MATIC: <span id="pendingMATIC">0</span></p>
+                                    <div id="marketClaimArea">
+                                        <!-- 这里会根据是否有收入动态显示按钮 -->
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 领取收入状态 -->
+                            <div id="marketClaimStatus" style="margin-top: 1rem;"></div>
+                            <!-- 挂单表单 -->
+                            <div class="section" style="margin-top: 2rem; padding: 2rem;">
+                                <h3>挂新订单</h3>
+                                <div class="form-group">
+                                    <label>卖出 DC（卖单）</label>
+                                    <input type="number" id="sellDcAmount" placeholder="DC 数量（1000 的整数倍）" step="1000" min="1000">
+                                    <input type="number" id="sellPrice" placeholder="每 1000 DC 价格（MATIC）" step="0.000001" min="0.000001">
+                                    <div class="btn-row">
+                                        <button class="claim-btn" id="placeSellBtn" style="background: linear-gradient(135deg, #f44336, #ff8a80);">
+                                            <i class="fas fa-arrow-down"></i> 挂卖单
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>买入 DC（买单）</label>
+                                    <input type="number" id="buyDcAmount" placeholder="DC 数量（1000 的整数倍）" step="1000" min="1000">
+                                    <input type="number" id="buyPrice" placeholder="每 1000 DC 价格（MATIC）" step="0.000001" min="0.000001">
+                                    <div class="btn-row">
+                                        <button class="claim-btn" id="placeBuyBtn" style="background: linear-gradient(135deg, #4caf50, #81c784);">
+                                            <i class="fas fa-arrow-up"></i> 挂买单
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="placeOrderStatus" style="margin-top: 1rem;"></div>
+                            </div>
+                            <!-- 订单簿 -->
+                            <div class="section" style="margin-top: 2rem; padding: 2rem;">
+                                <h3>当前订单簿</h3>
+                                <button class="claim-btn" id="refreshOrdersBtn" style="margin-bottom: 1rem; background: linear-gradient(135deg, #9c27b0, #e040fb);">
+                                    <i class="fas fa-sync-alt"></i> 刷新订单
+                                </button>
+                                <h4>卖单（价格从低到高）</h4>
+                                <table class="order-table" id="askTable">
+                                    <thead>
+                                        <tr>
+                                            <th>订单ID</th>
+                                            <th>卖家</th>
+                                            <th>DC 数量</th>
+                                            <th>未成交</th>
+                                            <th>价格 (MATIC/1000DC)</th>
+                                            <th>总价值 (MATIC)</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="askBody"></tbody>
+                                </table>
+                                <h4 style="margin-top: 2rem;">买单（价格从高到低）</h4>
+                                <table class="order-table" id="bidTable">
+                                    <thead>
+                                        <tr>
+                                            <th>订单ID</th>
+                                            <th>买家</th>
+                                            <th>DC 数量</th>
+                                            <th>未成交</th>
+                                            <th>价格 (MATIC/1000DC)</th>
+                                            <th>总价值 (MATIC)</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bidBody"></tbody>
+                                </table>
+                            </div>
+                            <!-- 我的订单 -->
+                            <div class="section" style="margin-top: 2rem; padding: 2rem;">
+                                <h3>我的订单</h3>
+                                <button class="claim-btn" id="refreshMyOrdersBtn" style="margin-bottom: 1rem; background: linear-gradient(135deg, #ff9800, #ffb74d);">
+                                    <i class="fas fa-sync-alt"></i> 刷新我的订单
+                                </button>
+                                <div id="myOrdersList">
+                                    <p>加载中...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <!-- ========== 核心理念页面 ========== -->
                 <div id="concept-page" class="page active">
                     <section class="section">
                         <h2>DC代币系统核心理念</h2>
-                        <p>DeCurrency（DC）代币是部署在<strong class="highlight">Polygon主网</strong>的去中心化代币系统，其核心理念是<strong class="highlight">“个人主权货币”与“民主自治治理”</strong>，打破传统中心化机构的垄断，让每个参与者拥有平等的身份权和治理权。</p>
+                        <p>DeCurrency（DC）代币是部署在<strong class="highlight">Polygon主网</strong>的去中心化代币系统，其核心理念是<strong class="highlight">"个人主权货币"与"民主自治治理"</strong>，打破传统中心化机构的垄断，让每个参与者拥有平等的身份权和治理权。</p>
                         <p style="margin-top: 1.5rem; margin-bottom: 2rem;">与传统代币不同，DC代币系统融合了四大核心设计，旨在构建一个可持续、去中心化、由社区自主管理的货币生态：</p>
                         <div class="blocks-grid">
                             <div class="block-card">
@@ -696,17 +1042,19 @@
                         </div>
                     </section>
                 </div>
+                <!-- ========== 参与和治理页面 ========== -->
                 <div id="participate-page" class="page">
                     <div class="contract-info-card">
                         <h3>合约基础信息</h3>
                         <p>网络：<span class="highlight">Polygon主网</span></p>
-                        <p>合约地址：<span class="highlight">0x8Cb3bA05Efa695799E1cF0A2d2921e2387CbFB2C</span></p>
+                        <p>DC合约地址：<span class="highlight">0x8Cb3bA05Efa695799E1cF0A2d2921e2387CbFB2C</span></p>
+                        <p>市场合约地址：<span class="highlight">0xD0A346783518d19A9167aDA8476178bE586D7Df3</span></p>
                         <p>代币名称：<span class="highlight">DeCurrency (DC)</span></p>
                         <p>代币小数位：<span class="highlight">2位</span></p>
                     </div>
                     <section class="section">
                         <h2>如何获取DC系统身份</h2>
-                        <p>在DC系统中，<strong class="highlight">“已验证身份”</strong>是参与所有核心功能的前提（如铸造代币、成为验证者、参与投票），获取身份需完成以下步骤：</p>
+                        <p>在DC系统中，<strong class="highlight">"已验证身份"</strong>是参与所有核心功能的前提（如铸造代币、成为验证者、参与投票），获取身份需完成以下步骤：</p>
                         <div class="steps-blocks">
                             <div class="step-card" data-step="1">
                                 <h4>准备足够的DC代币</h4>
@@ -714,7 +1062,7 @@
                             </div>
                             <div class="step-card" data-step="2">
                                 <h4>提交身份认证申请</h4>
-                                <p>调用合约的<code class="code-inline">application(string memory _URL)</code>函数，传入能证明自身身份的视频/文件网络地址（供验证者审核），提交后会进入申请列表（列表上限200人），状态变为“申请中”。</p>
+                                <p>调用合约的<code class="code-inline">application(string memory _URL)</code>函数，传入能证明自身身份的视频/文件网络地址（供验证者审核），提交后会进入申请列表（列表上限200人），状态变为"申请中"。</p>
                             </div>
                             <div class="step-card" data-step="3">
                                 <h4>等待验证者投票审核</h4>
@@ -767,7 +1115,7 @@
                             </div>
                             <div class="block-card">
                                 <h4><i class="fas fa-clipboard-check"></i>投票流程</h4>
-                                <p>调用合约的<code class="code-inline">vote(address _Address, bool approv)</code>函数，选择对某个申请者投同意票（true）或反对票（false），投票后进入“投票中”状态。</p>
+                                <p>调用合约的<code class="code-inline">vote(address _Address, bool approv)</code>函数，选择对某个申请者投同意票（true）或反对票（false），投票后进入"投票中"状态。</p>
                             </div>
                             <div class="block-card">
                                 <h4><i class="fas fa-gift"></i>投票奖励</h4>
@@ -780,35 +1128,16 @@
                         </div>
                     </section>
                 </div>
+                <!-- ========== 个人信息页面 ========== -->
                 <div id="profile-page" class="page">
                     <section class="section">
                         <h2>个人信息中心</h2>
-                        <div class="wallet-connect-area">
-                            <select class="wallet-select" id="walletSelect">
-                                <option value="">请选择钱包</option>
-                                <option value="metamask">MetaMask</option>
-                                <option value="okx">OKX Wallet</option>
-                            </select>
-                            <button class="wallet-connect-btn" id="connectWalletBtn">
-                                <i class="fas fa-link"></i> <span id="connectBtnText">连接 Polygon 钱包</span>
-                            </button>
-                            <div class="wallet-info" id="walletInfo" style="display: none;">
-                                <span class="wallet-name" id="walletName">钱包</span>
-                                <div class="wallet-address">
-                                    <span class="address-text" id="walletAddress">0x...</span>
-                                    <button class="copy-btn" id="copyBtn" title="复制地址">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <button class="disconnect-btn" id="disconnectBtn" style="display: none;">
-                                <i class="fas fa-unlink"></i> 断开钱包
-                            </button>
-                        </div>
-                        <div id="walletNotConnected" class="wallet-not-connected">
+                        <!-- 钱包未连接提示 -->
+                        <div id="walletNotConnected" class="wallet-not-connected" style="display: none;">
                             <p>请先连接你的Polygon钱包，以查看个人资产和身份状态信息。</p>
                         </div>
-                        <div id="profileInfo" style="display: none;">
+                        <!-- 钱包已连接内容 -->
+                        <div id="profileInfo">
                             <div class="info-grid">
                                 <div class="info-card">
                                     <h4><i class="fas fa-coins"></i> 我的DC代币数量</h4>
@@ -828,10 +1157,9 @@
                                     <div id="mintStatusBlock"></div>
                                 </div>
                             </div>
-
                             <!-- 提交身份认证板块 -->
                             <div class="section" id="applySection" style="margin-top: 2rem; display: none;">
-                                <h3> 提交身份认证申请</h3>
+                                <h3>提交身份认证申请</h3>
                                 <p>需消耗 <strong class="highlight">5000 DC</strong>，提交一个证明你身份的视频或文件链接。</p>
                                 <input type="url" id="identityURL" placeholder="请输入身份证明文件的公开URL（如 Google Drive、IPFS 等）" style="width: 100%; padding: 0.8rem; margin: 1rem 0; background: var(--bg-card); color: #e0e0e0; border: 1px solid rgba(129,199,132,0.1); border-radius: 6px;">
                                 <button class="claim-btn" id="applyBtn" style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
@@ -839,8 +1167,7 @@
                                 </button>
                                 <div id="applyStatus" style="margin-top: 1rem;"></div>
                             </div>
-
-                            <!-- 获取投票权板块 -->
+                            <!-- 获取投票权板块（仅当不是验证者时显示） -->
                             <div class="section" id="voterSection" style="display: none;">
                                 <h3>获取投票权（成为验证者）</h3>
                                 <p>验证者可审核他人身份申请。需满足：<br>✅ 已认证身份 &nbsp; ✅ 7天最低余额足够高</p>
@@ -849,23 +1176,20 @@
                                 </button>
                                 <div id="voterStatus" style="margin-top: 1rem;"></div>
                             </div>
-
                             <!-- 参与投票 -->
                             <div class="section">
                                 <h3>参与投票（审核身份申请）</h3>
                                 <div id="pendingApplication" style="margin-top: 1rem;"></div>
                             </div>
-
                             <!-- 我的投票进度 -->
                             <div class="section">
-                                <h3> 我的投票进度</h3>
+                                <h3>我的投票进度</h3>
                                 <div id="myVoteProgress" style="margin-top: 1rem;"></div>
                             </div>
-
-                            <!-- 领取投票奖励 -->
-                            <div class="section">
-                                <h3> 领取投票奖励</h3>
-                                <p>投票结果一致可领取 <strong class="highlight">2000 DC</strong> 奖励。</p>
+                            <!-- 领取投票奖励（动态显示） -->
+                            <div class="section" id="rewardSection" style="display: none;">
+                                <h3>领取投票奖励</h3>
+                                <div id="rewardInfo"></div>
                                 <button class="claim-btn" id="claimRewardBtn" style="background: linear-gradient(135deg, #00bcd4, #80deea);">
                                     <i class="fas fa-gift"></i> 领取投票奖励
                                 </button>
@@ -1009,7 +1333,6 @@
             }
             resizeCanvas();
             animate();
-
             // ========== 页面切换 ==========
             const navLinks = document.querySelectorAll('.nav-link');
             const pages = document.querySelectorAll('.page');
@@ -1021,15 +1344,48 @@
                     const targetPage = link.getAttribute('data-page');
                     link.classList.add('active');
                     document.getElementById(targetPage).classList.add('active');
+                    // 当切换到市场页面时，如果已连接钱包，重新加载数据
+                    if (targetPage === 'market-page' && window.provider && window.userAddress) {
+                        loadMarketData();
+                    }
+                    // 当切换到个人信息页面时，如果已连接钱包，重新加载数据
+                    if (targetPage === 'profile-page' && window.provider && window.userAddress) {
+                        loadProfileData();
+                    }
                 });
             });
-
-            // ========== 钱包与合约逻辑 ==========
-            let provider = null;
-            let signer = null;
-            let userAddress = null;
-            let currentWallet = null;
-            const DC_CONTRACT_ADDRESS = '0x8Cb3bA05Efa695799E1cF0A2d2921e2387CbFB2C';
+            // ========== 全局常量 ==========
+            const POLYGON_CHAIN_ID = 137;
+            const DC_TOKEN_ADDRESS = '0x8Cb3bA05Efa695799E1cF0A2d2921e2387CbFB2C';
+            const MARKET_CONTRACT_ADDRESS = '0xD0A346783518d19A9167aDA8476178bE586D7Df3';
+            const UNIT_SIZE_DC = ethers.utils.parseUnits('1000', 2); // 1000 * 10^2
+            const ERC20_ABI = [
+                "function balanceOf(address) view returns (uint256)",
+                "function decimals() view returns (uint8)",
+                "function approve(address spender, uint256 amount) returns (bool)",
+                "function allowance(address owner, address spender) view returns (uint256)",
+                "function transfer(address to, uint256 amount) returns (bool)"
+            ];
+            // 修正市场合约ABI - 将所有POL相关的方法名改为MATIC
+            const MARKET_CONTRACT_ABI = [
+                "function nextOrderId() view returns (uint256)",
+                "function orders(uint256) view returns (address owner, uint8 orderType, uint256 dcAmount, uint256 pricePerUnit, uint256 filled, bool active)",
+                "function pendingMATIC(address) view returns (uint256)", // 修正: pendingPOL -> pendingMATIC
+                "function pendingDC(address) view returns (uint256)",
+                "function placeBuyOrder(uint256 dcAmount, uint256 pricePerUnit)",
+                "function placeSellOrder(uint256 dcAmount, uint256 pricePerUnit)",
+                "function fillOrder(uint256 orderId, uint256 dcAmountToTake)",
+                "function cancelOrder(uint256 orderId)",
+                "function claimAll()",
+                "function depositDC(uint256 amount)",
+                "function depositMATIC() payable", // 修正: depositPOL -> depositMATIC
+                "function withdrawDC(uint256 amount)",
+                "function withdrawMATIC(uint256 amount)", // 修正: withdrawPOL -> withdrawMATIC
+                "function depositedDC(address) view returns (uint256)",
+                "function depositedMATIC(address) view returns (uint256)", // 修正: depositedPOL -> depositedMATIC
+                "function getUserOrderIds(address user) view returns (uint256[] memory)"
+            ];
+            // DC合约ABI
             const DC_CONTRACT_ABI = [
                 'function balanceOf(address) view returns (uint256)',
                 'function decimals() view returns (uint8)',
@@ -1050,30 +1406,52 @@
                 'function application(string memory _URL)',
                 'function bevoter()',
                 'function vote(address _Address, bool approv)',
-                'function getrewards()'
+                'function getrewards()',
+                'function refreshbalance()',
+                'function transfer(address to, uint256 value) returns (bool)'
             ];
-            const POLYGON_CHAIN_ID = 137;
-            const CLAIM_COOLDOWN = 86400;
-
-            const walletSelect = document.getElementById('walletSelect');
-            const connectWalletBtn = document.getElementById('connectWalletBtn');
-            const connectBtnText = document.getElementById('connectBtnText');
+            // ========== 全局状态 ==========
+            window.provider = null;
+            window.signer = null;
+            window.userAddress = null;
+            window.currentWallet = null;
+            window.isWalletConnected = false;
+            // ========== 全局钱包连接元素 ==========
+            const globalWalletSelect = document.getElementById('globalWalletSelect');
+            const globalConnectWalletBtn = document.getElementById('globalConnectWalletBtn');
+            const globalWalletInfo = document.getElementById('globalWalletInfo');
+            const globalWalletName = document.getElementById('globalWalletName');
+            const globalWalletAddress = document.getElementById('globalWalletAddress');
+            const globalCopyBtn = document.getElementById('globalCopyBtn');
+            const globalDisconnectBtn = document.getElementById('globalDisconnectBtn');
+            const copyToast = document.getElementById('copyToast');
+            // ========== 市场页面元素 ==========
+            const marketWalletNotConnected = document.getElementById('marketWalletNotConnected');
+            const marketConnectedPanel = document.getElementById('marketConnectedPanel');
+            const marketDcBalance = document.getElementById('marketDcBalance');
+            const marketMaticBalance = document.getElementById('marketMaticBalance'); // 修正: marketPolBalance -> marketMaticBalance
+            const pendingDC = document.getElementById('pendingDC');
+            const pendingMATIC = document.getElementById('pendingMATIC'); // 修正: pendingPOL -> pendingMATIC
+            const marketClaimArea = document.getElementById('marketClaimArea'); // 新增
+            const placeSellBtn = document.getElementById('placeSellBtn');
+            const placeBuyBtn = document.getElementById('placeBuyBtn');
+            const askBody = document.getElementById('askBody');
+            const bidBody = document.getElementById('bidBody');
+            const marketClaimStatus = document.getElementById('marketClaimStatus');
+            const placeOrderStatus = document.getElementById('placeOrderStatus');
+            const myOrdersList = document.getElementById('myOrdersList');
+            const refreshOrdersBtn = document.getElementById('refreshOrdersBtn');
+            const refreshMyOrdersBtn = document.getElementById('refreshMyOrdersBtn');
+            // ========== 个人信息页面元素 ==========
             const walletNotConnected = document.getElementById('walletNotConnected');
             const profileInfo = document.getElementById('profileInfo');
-            const walletInfo = document.getElementById('walletInfo');
-            const walletNameEl = document.getElementById('walletName');
-            const walletAddress = document.getElementById('walletAddress');
-            const copyBtn = document.getElementById('copyBtn');
-            const disconnectBtn = document.getElementById('disconnectBtn');
-            const copyToast = document.getElementById('copyToast');
             const mintStatusBlock = document.getElementById('mintStatusBlock');
-
-            if (typeof ethers === 'undefined') {
-                alert('ethers.js库加载失败，请检查网络！');
-                connectWalletBtn.disabled = true;
-                return;
-            }
-
+            const rewardSection = document.getElementById('rewardSection');
+            const rewardInfo = document.getElementById('rewardInfo');
+            const claimRewardBtn = document.getElementById('claimRewardBtn');
+            const voterSection = document.getElementById('voterSection');
+            const becomeVoterBtn = document.getElementById('becomeVoterBtn');
+            // ========== 通用函数 ==========
             function getInjectedProvider(walletType) {
                 if (walletType === 'okx' && window.okxwallet) {
                     return window.okxwallet;
@@ -1084,468 +1462,917 @@
                 }
                 return null;
             }
-
-            async function switchToPolygonNetwork(providerInstance) {
+            async function switchToPolygon(providerInstance) {
                 try {
                     await providerInstance.request({
                         method: 'wallet_switchEthereumChain',
                         params: [{ chainId: '0x89' }]
                     });
+                    return true;
                 } catch (switchError) {
                     if (switchError.code === 4902) {
-                        await providerInstance.request({
-                            method: 'wallet_addEthereumChain',
-                            params: [{
-                                chainId: '0x89',
-                                chainName: 'Polygon Mainnet',
-                                nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
-                                rpcUrls: ['https://polygon-rpc.com/'],
-                                blockExplorerUrls: ['https://polygonscan.com/']
-                            }]
-                        });
+                        try {
+                            await providerInstance.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x89',
+                                    chainName: 'Polygon Mainnet',
+                                    nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 }, // 修正: POL -> MATIC
+                                    rpcUrls: ['https://polygon-rpc.com/'],
+                                    blockExplorerUrls: ['https://polygonscan.com/']
+                                }]
+                            });
+                            return true;
+                        } catch (addError) {
+                            console.error('添加Polygon网络失败:', addError);
+                            return false;
+                        }
                     } else {
-                        throw switchError;
+                        console.error('切换Polygon网络失败:', switchError);
+                        return false;
                     }
                 }
             }
-
-            connectWalletBtn.addEventListener('click', async () => {
-                const selectedWallet = walletSelect.value;
+            function showToast(message) {
+                copyToast.textContent = message;
+                copyToast.style.display = 'block';
+                setTimeout(() => copyToast.style.display = 'none', 2000);
+            }
+            function showLoading(button, text = '处理中...') {
+                const originalHTML = button.innerHTML;
+                button.innerHTML = `<span class="loading-spinner"></span> ${text}`;
+                button.disabled = true;
+                return () => {
+                    button.innerHTML = originalHTML;
+                    button.disabled = false;
+                };
+            }
+            function showError(element, message) {
+                element.innerHTML = `<div class="error-message">❌ ${message}</div>`;
+            }
+            function showSuccess(element, message) {
+                element.innerHTML = `<div class="success-message">✅ ${message}</div>`;
+            }
+            // ========== 全局钱包连接逻辑 ==========
+            globalConnectWalletBtn.addEventListener('click', async () => {
+                await connectWallet();
+            });
+            globalDisconnectBtn.addEventListener('click', () => {
+                disconnectWallet();
+            });
+            globalCopyBtn.addEventListener('click', async () => {
+                if (!window.userAddress) return;
+                try {
+                    await navigator.clipboard.writeText(window.userAddress);
+                    showToast('地址复制成功！');
+                } catch (err) {
+                    showToast('复制失败');
+                }
+            });
+            async function connectWallet() {
+                const selectedWallet = globalWalletSelect.value;
                 if (!selectedWallet) {
                     alert('请选择一个钱包类型');
                     return;
                 }
-
                 const providerInstance = getInjectedProvider(selectedWallet);
                 if (!providerInstance) {
-                    if (selectedWallet === 'okx') {
-                        alert('请安装 OKX 钱包插件（https://www.okx.com/zh-hans/web3）');
-                    } else {
-                        alert('请安装 MetaMask 钱包插件');
-                    }
+                    alert(selectedWallet === 'okx' ? '请安装 OKX 钱包' : '请安装 MetaMask');
                     return;
                 }
-
                 try {
-                    connectBtnText.textContent = '连接中...';
-                    connectWalletBtn.disabled = true;
-
+                    const cleanup = showLoading(globalConnectWalletBtn, '连接中...');
                     const accounts = await providerInstance.request({ method: 'eth_requestAccounts' });
-                    userAddress = accounts[0];
-                    currentWallet = selectedWallet;
-
-                    const chainId = await providerInstance.request({ method: 'eth_chainId' });
-                    if (parseInt(chainId, 16) !== POLYGON_CHAIN_ID) {
-                        await switchToPolygonNetwork(providerInstance);
+                    const userAddress = accounts[0];
+                    const switched = await switchToPolygon(providerInstance);
+                    if (!switched) {
+                        throw new Error('请切换到Polygon网络');
                     }
-
-                    provider = new ethers.providers.Web3Provider(providerInstance);
-                    signer = provider.getSigner();
-
-                    updateWalletInfo(selectedWallet);
-                    await getUserProfileData();
+                    const provider = new ethers.providers.Web3Provider(providerInstance);
+                    const signer = provider.getSigner();
+                    // 更新全局状态
+                    window.provider = provider;
+                    window.signer = signer;
+                    window.userAddress = userAddress;
+                    window.currentWallet = selectedWallet;
+                    window.isWalletConnected = true;
+                    // 更新全局钱包显示
+                    globalConnectWalletBtn.style.display = 'none';
+                    globalWalletSelect.style.display = 'none';
+                    globalWalletInfo.style.display = 'flex';
+                    const walletNames = { metamask: 'MetaMask', okx: 'OKX Wallet' };
+                    globalWalletName.textContent = walletNames[selectedWallet] || '钱包';
+                    const shortAddr = `${userAddress.substring(0,6)}...${userAddress.substring(userAddress.length-4)}`;
+                    globalWalletAddress.textContent = shortAddr;
+                    globalWalletAddress.title = userAddress;
+                    // 更新页面显示状态
+                    updatePageWalletState(true);
+                    // 加载当前页面的数据
+                    const activePage = document.querySelector('.page.active').id;
+                    if (activePage === 'market-page') {
+                        await loadMarketData();
+                    } else if (activePage === 'profile-page') {
+                        await loadProfileData();
+                    }
+                    // 设置钱包事件监听
+                    setupWalletListeners(providerInstance);
+                    showToast('钱包连接成功！');
+                    cleanup();
                 } catch (error) {
-                    console.error('连接失败：', error);
-                    alert(`连接失败：${error.message || '用户拒绝连接'}`);
-                    connectBtnText.textContent = '连接 Polygon 钱包';
-                    connectWalletBtn.disabled = false;
-                }
-            });
-
-            disconnectBtn.addEventListener('click', () => {
-                provider = null;
-                signer = null;
-                userAddress = null;
-                currentWallet = null;
-                walletInfo.style.display = 'none';
-                disconnectBtn.style.display = 'none';
-                profileInfo.style.display = 'none';
-                walletNotConnected.style.display = 'block';
-                connectBtnText.textContent = '连接 Polygon 钱包';
-                connectWalletBtn.disabled = false;
-                walletSelect.value = '';
-                mintStatusBlock.innerHTML = '';
-                document.getElementById('applyStatus').innerHTML = '';
-                document.getElementById('voterStatus').innerHTML = '';
-                document.getElementById('pendingApplication').innerHTML = '';
-                document.getElementById('myVoteProgress').innerHTML = '';
-                document.getElementById('rewardStatus').innerHTML = '';
-                if (window.mintCountdownInterval) {
-                    clearInterval(window.mintCountdownInterval);
-                    window.mintCountdownInterval = null;
-                }
-            });
-
-            copyBtn.addEventListener('click', async () => {
-                if (!userAddress) return;
-                try {
-                    await navigator.clipboard.writeText(userAddress);
-                    copyToast.style.display = 'block';
-                    setTimeout(() => copyToast.style.display = 'none', 3000);
-                } catch (err) {
-                    alert('复制失败，请手动复制！');
-                }
-            });
-
-            function updateWalletInfo(walletType) {
-                walletNotConnected.style.display = 'none';
-                profileInfo.style.display = 'block';
-                walletInfo.style.display = 'flex';
-                disconnectBtn.style.display = 'block';
-
-                const walletNames = { metamask: 'MetaMask', okx: 'OKX Wallet' };
-                const walletName = walletNames[walletType] || '钱包';
-                walletNameEl.textContent = walletName;
-
-                const shortAddress = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
-                walletAddress.textContent = shortAddress;
-                walletAddress.setAttribute('title', userAddress);
-                connectBtnText.textContent = '钱包已连接';
-                connectWalletBtn.style.background = 'linear-gradient(135deg, #4caf50, #81c784)';
-            }
-
-            async function getUserProfileData() {
-                if (!provider || !userAddress) return;
-                try {
-                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, provider);
-                    const [
-                        balance,
-                        decimals,
-                        isVerified,
-                        lastClaimTime,
-                        minBalance,
-                        isVoter,
-                        isApplying
-                    ] = await Promise.all([
-                        contract.balanceOf(userAddress),
-                        contract.decimals(),
-                        contract.verified(userAddress),
-                        contract.lastclaimtime(userAddress),
-                        contract.minbalanceOf(userAddress),
-                        contract.voter(userAddress),
-                        contract.isappling(userAddress)
-                    ]);
-
-                    const formattedBalance = ethers.utils.formatUnits(balance, decimals);
-                    document.getElementById('tokenBalance').textContent = `${parseFloat(formattedBalance).toFixed(2)} DC`;
-
-                    const verifyStatusEl = document.getElementById('verifyStatus');
-                    if (isVerified) {
-                        verifyStatusEl.className = 'status positive';
-                        verifyStatusEl.textContent = '已认证';
-                        document.getElementById('applySection').style.display = 'none';
-                    } else if (isApplying) {
-                        verifyStatusEl.className = 'status neutral';
-                        verifyStatusEl.textContent = '认证中';
-                        document.getElementById('applySection').style.display = 'none';
-                    } else {
-                        verifyStatusEl.className = 'status negative';
-                        verifyStatusEl.textContent = '未认证';
-                        document.getElementById('applySection').style.display = 'block';
-                    }
-
-                    const voteStatusEl = document.getElementById('voteStatus');
-                    if (isVoter) {
-                        voteStatusEl.className = 'status positive';
-                        voteStatusEl.textContent = '拥有投票权';
-                        document.getElementById('voterSection').style.display = 'none';
-                    } else {
-                        voteStatusEl.className = 'status negative';
-                        voteStatusEl.textContent = '无投票权';
-                        document.getElementById('voterSection').style.display = 'block';
-                    }
-
-                    document.getElementById('minBalance').textContent = (parseFloat(ethers.utils.formatUnits(minBalance, decimals)) || 0).toFixed(2);
-
-                    await handleMintStatus(isVerified, lastClaimTime.toNumber(), contract);
-                    await loadPendingApplication();
-                    await loadMyVoteProgress();
-                } catch (error) {
-                    console.error('获取用户数据失败：', error);
-                    alert(`获取数据失败：${error.message}`);
-                }
-            }
-
-            async function handleMintStatus(isVerified, lastClaimTimestamp, contract) {
-                const now = Math.floor(Date.now() / 1000);
-                let htmlContent = '';
-                if (!isVerified) {
-                    htmlContent = '<span class="status negative">身份未认证，不可铸造</span>';
-                    mintStatusBlock.innerHTML = htmlContent;
-                    if (window.mintCountdownInterval) {
-                        clearInterval(window.mintCountdownInterval);
-                        window.mintCountdownInterval = null;
-                    }
-                    return;
-                }
-                const nextClaimTimestamp = lastClaimTimestamp + CLAIM_COOLDOWN;
-                if (now >= nextClaimTimestamp) {
-                    htmlContent = `
-                        <span class="status positive">可铸造</span>
-                        <button class="claim-btn" id="claimBtn">
-                            <i class="fas fa-coins"></i> 铸造 1000 DC
-                        </button>
-                    `;
-                    mintStatusBlock.innerHTML = htmlContent;
-                    document.getElementById('claimBtn').addEventListener('click', () => claimTokens(contract));
-                } else {
-                    htmlContent = `
-                        <span class="status neutral" id="countdownText">计算中...</span>
-                    `;
-                    mintStatusBlock.innerHTML = htmlContent;
-                    updateMintCountdownDisplay(nextClaimTimestamp);
-                    if (window.mintCountdownInterval) clearInterval(window.mintCountdownInterval);
-                    window.mintCountdownInterval = setInterval(() => {
-                        const currentTime = Math.floor(Date.now() / 1000);
-                        if (currentTime >= nextClaimTimestamp) {
-                            getUserProfileData();
-                        } else {
-                            updateMintCountdownDisplay(nextClaimTimestamp);
-                        }
+                    console.error('连接失败:', error);
+                    alert('连接失败：' + (error.message || '用户取消'));
+                    const cleanup = showLoading(globalConnectWalletBtn, '连接失败');
+                    setTimeout(() => {
+                        cleanup();
+                        globalConnectWalletBtn.innerHTML = '<i class="fas fa-link"></i> 连接钱包';
                     }, 1000);
                 }
             }
-
-            function updateMintCountdownDisplay(nextClaimTimestamp) {
-                const now = Math.floor(Date.now() / 1000);
-                const diff = nextClaimTimestamp - now;
-                if (diff <= 0) {
-                    mintStatusBlock.innerHTML = '<span class="status neutral">即将可铸造</span>';
-                    return;
-                }
-                const hours = Math.floor(diff / 3600);
-                const minutes = Math.floor((diff % 3600) / 60);
-                const seconds = diff % 60;
-                const countdownText = document.getElementById('countdownText');
-                if (countdownText) {
-                    countdownText.textContent = `可铸造还需 ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            function disconnectWallet() {
+                window.provider = null;
+                window.signer = null;
+                window.userAddress = null;
+                window.currentWallet = null;
+                window.isWalletConnected = false;
+                // 更新全局钱包显示
+                globalWalletInfo.style.display = 'none';
+                globalConnectWalletBtn.style.display = 'flex';
+                globalWalletSelect.style.display = 'block';
+                globalWalletSelect.value = '';
+                globalConnectWalletBtn.innerHTML = '<i class="fas fa-link"></i> 连接钱包';
+                // 更新页面显示状态
+                updatePageWalletState(false);
+                showToast('钱包已断开');
+            }
+            function updatePageWalletState(isConnected) {
+                // 更新市场页面
+                if (isConnected) {
+                    marketWalletNotConnected.style.display = 'none';
+                    marketConnectedPanel.style.display = 'block';
+                    walletNotConnected.style.display = 'none';
+                    profileInfo.style.display = 'block';
+                } else {
+                    marketWalletNotConnected.style.display = 'block';
+                    marketConnectedPanel.style.display = 'none';
+                    walletNotConnected.style.display = 'block';
+                    profileInfo.style.display = 'none';
+                    // 清除市场页面数据
+                    marketDcBalance.textContent = '0.00 DC';
+                    marketMaticBalance.textContent = '0.00 MATIC'; // 修正: POL -> MATIC
+                    pendingDC.textContent = '0';
+                    pendingMATIC.textContent = '0'; // 修正: pendingPOL -> pendingMATIC
+                    askBody.innerHTML = '';
+                    bidBody.innerHTML = '';
+                    myOrdersList.innerHTML = '<p>已断开连接</p>';
+                    marketClaimArea.innerHTML = ''; // 清空领取按钮
                 }
             }
-
-            async function claimTokens(contract) {
-                try {
-                    const claimBtn = document.getElementById('claimBtn');
-                    if (!claimBtn) return;
-                    claimBtn.disabled = true;
-                    claimBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 铸造中...';
-                    const gasLimit = 1500000;
-                    const feeData = await provider.getFeeData();
-                    const tx = await contract.connect(signer).claim({
-                        gasLimit: gasLimit,
-                        ...(feeData.maxFeePerGas ? {
-                            maxFeePerGas: feeData.maxFeePerGas,
-                            maxPriorityFeePerGas: feeData.maxPriorityFeePerGas || ethers.utils.parseUnits("20", "gwei")
-                        } : {
-                            gasPrice: feeData.gasPrice || ethers.utils.parseUnits("20", "gwei")
-                        })
-                    });
-                    await tx.wait();
-                    alert('✅ 铸造成功！已领取 1000 DC。');
-                    await getUserProfileData();
-                } catch (error) {
-                    console.error('铸造失败:', error);
-                    if (error.code === 'ACTION_REJECTED') {
-                        alert('❌ 您取消了交易。');
-                    } else if (error.code === 'INSUFFICIENT_FUNDS') {
-                        alert('❌ Gas 费不足，请确保钱包有足够 MATIC。');
+            function setupWalletListeners(providerInstance) {
+                // 账户变化监听
+                providerInstance.on('accountsChanged', async (accounts) => {
+                    if (accounts.length > 0) {
+                        window.userAddress = accounts[0];
+                        const shortAddr = `${window.userAddress.substring(0,6)}...${window.userAddress.substring(window.userAddress.length-4)}`;
+                        globalWalletAddress.textContent = shortAddr;
+                        globalWalletAddress.title = window.userAddress;
+                        // 重新加载当前页面的数据
+                        const activePage = document.querySelector('.page.active').id;
+                        if (activePage === 'market-page') {
+                            await loadMarketData();
+                        } else if (activePage === 'profile-page') {
+                            await loadProfileData();
+                        }
+                        showToast('账户已切换');
                     } else {
-                        alert(`❌ 铸造失败：${error.reason || error.message || '未知错误'}`);
+                        disconnectWallet();
                     }
-                    const btn = document.getElementById('claimBtn');
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-coins"></i> 铸造 1000 DC';
+                });
+                // 网络变化监听
+                providerInstance.on('chainChanged', () => {
+                    window.location.reload();
+                });
+            }
+            // 自动检测已连接钱包
+            async function autoConnectWallet() {
+                if (window.ethereum) {
+                    try {
+                        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                        if (accounts.length > 0) {
+                            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                            if (parseInt(chainId, 16) === POLYGON_CHAIN_ID) {
+                                // 自动连接
+                                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                                const signer = provider.getSigner();
+                                const userAddress = accounts[0];
+                                window.provider = provider;
+                                window.signer = signer;
+                                window.userAddress = userAddress;
+                                window.currentWallet = 'metamask';
+                                window.isWalletConnected = true;
+                                // 更新显示
+                                globalConnectWalletBtn.style.display = 'none';
+                                globalWalletSelect.style.display = 'none';
+                                globalWalletInfo.style.display = 'flex';
+                                globalWalletName.textContent = 'MetaMask';
+                                const shortAddr = `${userAddress.substring(0,6)}...${userAddress.substring(userAddress.length-4)}`;
+                                globalWalletAddress.textContent = shortAddr;
+                                globalWalletAddress.title = userAddress;
+                                updatePageWalletState(true);
+                                setupWalletListeners(window.ethereum);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('自动连接失败:', error);
                     }
                 }
             }
-
-            // ========== 新增功能 ==========
-            document.getElementById('applyBtn')?.addEventListener('click', async () => {
-                const url = document.getElementById('identityURL').value.trim();
-                if (!url) {
-                    alert('请输入有效的身份证明URL');
-                    return;
-                }
-                if (!provider || !signer || !userAddress) {
-                    alert('请先连接钱包');
-                    return;
-                }
+            // 页面加载时自动检测钱包
+            autoConnectWallet();
+            // ========== 市场页面逻辑 ==========
+            async function loadMarketData() {
+                if (!window.provider || !window.userAddress) return;
                 try {
-                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, signer);
-                    const tx = await contract.application(url);
-                    document.getElementById('applyStatus').innerHTML = '<span class="status neutral">提交中...请等待交易确认</span>';
-                    await tx.wait();
-                    document.getElementById('applyStatus').innerHTML = '<span class="status positive">✅ 身份认证申请已提交！</span>';
-                    getUserProfileData();
-                } catch (err) {
-                    console.error(err);
-                    document.getElementById('applyStatus').innerHTML = `<span class="status negative">❌ 提交失败：${err.reason || err.message}</span>`;
-                }
-            });
-
-            document.getElementById('becomeVoterBtn')?.addEventListener('click', async () => {
-                if (!provider || !signer || !userAddress) return;
-                try {
-                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, signer);
-                    const tx = await contract.bevoter();
-                    document.getElementById('voterStatus').innerHTML = '<span class="status neutral">申请中...</span>';
-                    await tx.wait();
-                    document.getElementById('voterStatus').innerHTML = '<span class="status positive">✅ 已成为验证者！</span>';
-                    getUserProfileData();
-                } catch (err) {
-                    console.error(err);
-                    document.getElementById('voterStatus').innerHTML = `<span class="status negative">❌ 申请失败：${err.reason || err.message}</span>`;
-                }
-            });
-
-            async function loadPendingApplication() {
-                if (!provider || !userAddress) return;
-                try {
-                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, provider);
-                    const count = await contract.refreshapplicants();
-                    if (count.toNumber() === 0) {
-                        document.getElementById('pendingApplication').innerHTML = '<p>暂无待审核的身份申请。</p>';
+                    const dcContract = new ethers.Contract(DC_TOKEN_ADDRESS, ERC20_ABI, window.provider);
+                    const marketContract = new ethers.Contract(MARKET_CONTRACT_ADDRESS, MARKET_CONTRACT_ABI, window.provider);
+                    // 检查网络
+                    const network = await window.provider.getNetwork();
+                    if (network.chainId !== POLYGON_CHAIN_ID) {
+                        alert('⚠️ 请确保你在 Polygon 主网！');
                         return;
                     }
-                    const firstApplicant = await contract.get_address_from_applylist(0);
-                    const url = await contract.application_URL(firstApplicant);
-                    const agree = await contract.agree(firstApplicant);
-                    const oppose = await contract.opposition(firstApplicant);
-                    const total = agree.add(oppose).toNumber();
-
-                    let html = `<p><strong>申请人地址：</strong>${firstApplicant}</p>`;
-                    html += `<p><strong>身份证明链接：</strong><a href="${url}" target="_blank" style="color:var(--accent-color);">${url || '无'}</a></p>`;
-                    html += `<p><strong>当前投票：</strong>同意 ${agree.toNumber()} 票，反对 ${oppose.toNumber()} 票（共 ${total} 票）</p>`;
-
-                    if (total < 100) {
-                        const isVoter = await contract.voter(userAddress);
-                        const isVerified = await contract.verified(userAddress);
-                        if (isVoter && isVerified) {
-                            html += `<button class="claim-btn" id="voteApproveBtn" data-addr="${firstApplicant}" style="margin-right:1rem;">同意</button>`;
-                            html += `<button class="claim-btn" id="voteRejectBtn" data-addr="${firstApplicant}" style="background:linear-gradient(135deg, #f44336, #ff8a80);">反对</button>`;
+                    // 加载余额
+                    const [dcBalance, dcDecimals, maticBalance, pendingDCBal, pendingMATICBal] = await Promise.all([ // 修正: polBalance -> maticBalance, pendingPOLBal -> pendingMATICBal
+                        dcContract.balanceOf(window.userAddress),
+                        dcContract.decimals(),
+                        window.provider.getBalance(window.userAddress),
+                        marketContract.pendingDC(window.userAddress),
+                        marketContract.pendingMATIC(window.userAddress) // 修正: pendingPOL -> pendingMATIC
+                    ]);
+                    // 更新显示
+                    marketDcBalance.textContent = `${parseFloat(ethers.utils.formatUnits(dcBalance, dcDecimals)).toFixed(2)} DC`;
+                    marketMaticBalance.textContent = `${parseFloat(ethers.utils.formatEther(maticBalance)).toFixed(4)} MATIC`; // 修正: POL -> MATIC
+                    pendingDC.textContent = parseFloat(ethers.utils.formatUnits(pendingDCBal, 2)).toFixed(2);
+                    pendingMATIC.textContent = parseFloat(ethers.utils.formatEther(pendingMATICBal)).toFixed(4); // 修正: pendingPOL -> pendingMATIC
+                    
+                    // 判断是否有待领取收入
+                    const hasPendingDC = pendingDCBal.gt(0);
+                    const hasPendingMATIC = pendingMATICBal.gt(0);
+                    
+                    // 更新待领取收入板块的按钮
+                    marketClaimArea.innerHTML = '';
+                    if (hasPendingDC || hasPendingMATIC) {
+                        const claimBtn = document.createElement('button');
+                        claimBtn.className = 'claim-btn';
+                        claimBtn.id = 'marketClaimBtn';
+                        claimBtn.innerHTML = '<i class="fas fa-gift"></i> 领取全部收入';
+                        claimBtn.style.marginTop = '0.5rem';
+                        claimBtn.style.width = '100%';
+                        claimBtn.addEventListener('click', async () => {
+                            await claimAllMarket();
+                        });
+                        marketClaimArea.appendChild(claimBtn);
+                    } else {
+                        marketClaimArea.innerHTML = '<p style="margin-top: 0.5rem; color: #888;">无收入可领取</p>';
+                    }
+                    
+                    // 加载订单
+                    await loadOrderBook(marketContract);
+                    await loadMyOrders(marketContract);
+                } catch (err) {
+                    console.error('加载市场数据失败:', err);
+                    showError(marketClaimStatus, '加载失败：' + (err.message || '请确保你在 Polygon 主网'));
+                }
+            }
+            
+            async function claimAllMarket() {
+                if (!window.signer) return;
+                const cleanup = showLoading(document.getElementById('marketClaimBtn'), '领取中...');
+                try {
+                    const marketContract = new ethers.Contract(MARKET_CONTRACT_ADDRESS, MARKET_CONTRACT_ABI, window.signer);
+                    const tx = await marketContract.claimAll();
+                    await tx.wait();
+                    showSuccess(marketClaimStatus, '领取成功！');
+                    await loadMarketData();
+                } catch (err) {
+                    console.error(err);
+                    showError(marketClaimStatus, `失败: ${err.reason || err.message}`);
+                } finally {
+                    cleanup();
+                }
+            }
+            
+            async function loadOrderBook(marketContract) {
+                if (!marketContract) {
+                    marketContract = new ethers.Contract(MARKET_CONTRACT_ADDRESS, MARKET_CONTRACT_ABI, window.provider);
+                }
+                try {
+                    const nextId = (await marketContract.nextOrderId()).toNumber();
+                    let asks = [];
+                    let bids = [];
+                    for (let i = 1; i < nextId; i++) {
+                        try {
+                            const order = await marketContract.orders(i);
+                            if (!order.active) continue;
+                            const dcAmount = order.dcAmount.toNumber();
+                            const filled = order.filled.toNumber();
+                            const remaining = dcAmount - filled;
+                            if (remaining <= 0) continue;
+                            const pricePerUnit = order.pricePerUnit;
+                            // 计算总价值
+                            const totalValue = order.dcAmount.mul(pricePerUnit).div(UNIT_SIZE_DC);
+                            const totalValueMATIC = parseFloat(ethers.utils.formatEther(totalValue));
+                            
+                            const orderData = {
+                                id: i,
+                                owner: order.owner,
+                                type: order.orderType,
+                                dcAmount,
+                                remaining,
+                                price: parseFloat(ethers.utils.formatEther(order.pricePerUnit)),
+                                totalValue: totalValueMATIC
+                            };
+                            if (orderData.type === 1) { // SELL
+                                asks.push(orderData);
+                            } else { // BUY
+                                bids.push(orderData);
+                            }
+                        } catch (e) {
+                            // 跳过无效订单ID
+                            continue;
+                        }
+                    }
+                    // 排序
+                    asks.sort((a, b) => a.price - b.price);
+                    bids.sort((a, b) => b.price - a.price);
+                    // 渲染卖单
+                    askBody.innerHTML = '';
+                    if (asks.length === 0) {
+                        askBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">暂无卖单</td></tr>';
+                    } else {
+                        asks.forEach(o => {
+                            const row = document.createElement('tr');
+                            row.className = 'order-row sell';
+                            row.innerHTML = `
+                                <td>${o.id}</td>
+                                <td>${o.owner.substring(0,6)}...${o.owner.substring(o.owner.length-4)}</td>
+                                <td>${(o.dcAmount / 100).toFixed(0)}</td>
+                                <td>${(o.remaining / 100).toFixed(0)}</td>
+                                <td>${o.price.toFixed(6)}</td>
+                                <td>${o.totalValue.toFixed(4)}</td>
+                                <td><button class="order-action-btn buy" data-id="${o.id}" data-amount="${o.remaining}">买入</button></td>
+                            `;
+                            askBody.appendChild(row);
+                        });
+                    }
+                    // 渲染买单
+                    bidBody.innerHTML = '';
+                    if (bids.length === 0) {
+                        bidBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">暂无买单</td></tr>';
+                    } else {
+                        bids.forEach(o => {
+                            const row = document.createElement('tr');
+                            row.className = 'order-row buy';
+                            row.innerHTML = `
+                                <td>${o.id}</td>
+                                <td>${o.owner.substring(0,6)}...${o.owner.substring(o.owner.length-4)}</td>
+                                <td>${(o.dcAmount / 100).toFixed(0)}</td>
+                                <td>${(o.remaining / 100).toFixed(0)}</td>
+                                <td>${o.price.toFixed(6)}</td>
+                                <td>${o.totalValue.toFixed(4)}</td>
+                                <td><button class="order-action-btn sell" data-id="${o.id}" data-amount="${o.remaining}">卖出</button></td>
+                            `;
+                            bidBody.appendChild(row);
+                        });
+                    }
+                    // 添加事件监听
+                    document.querySelectorAll('.order-action-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const orderId = parseInt(e.target.dataset.id);
+                            const amount = parseInt(e.target.dataset.amount);
+                            fillOrder(orderId, amount);
+                        });
+                    });
+                } catch (err) {
+                    console.error('加载订单簿失败:', err);
+                    askBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">加载失败</td></tr>';
+                    bidBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">加载失败</td></tr>';
+                }
+            }
+            // 修复：使用getUserOrderIds获取用户订单
+            async function loadMyOrders(marketContract) {
+                if (!marketContract) {
+                    marketContract = new ethers.Contract(MARKET_CONTRACT_ADDRESS, MARKET_CONTRACT_ABI, window.provider);
+                }
+                try {
+                    // 使用getUserOrderIds函数获取用户订单ID列表
+                    const userOrderIds = await marketContract.getUserOrderIds(window.userAddress);
+                    if (userOrderIds.length === 0) {
+                        myOrdersList.innerHTML = '<p>您没有挂单记录。</p>';
+                        return;
+                    }
+                    let html = '<table class="order-table"><thead><tr><th>订单ID</th><th>类型</th><th>总量</th><th>已成交</th><th>剩余</th><th>价格</th><th>总价值(MATIC)</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+                    for (const id of userOrderIds) {
+                        try {
+                            const order = await marketContract.orders(id);
+                            // 确保订单属于当前用户（合约应该已经确保，但双重检查）
+                            if (order.owner.toLowerCase() !== window.userAddress.toLowerCase()) continue;
+                            const type = order.orderType === 1 ? '卖单' : '买单';
+                            const totalDc = (order.dcAmount.toNumber() / 100).toFixed(0);
+                            const filledDc = (order.filled.toNumber() / 100).toFixed(0);
+                            const remainingDc = ((order.dcAmount.toNumber() - order.filled.toNumber()) / 100).toFixed(0);
+                            const price = parseFloat(ethers.utils.formatEther(order.pricePerUnit)).toFixed(6);
+                            
+                            // 计算总价值
+                            const totalValue = order.dcAmount.mul(order.pricePerUnit).div(UNIT_SIZE_DC);
+                            const totalValueMATIC = parseFloat(ethers.utils.formatEther(totalValue)).toFixed(4);
+                            
+                            const active = order.active;
+                            const remaining = order.dcAmount.sub(order.filled).toNumber();
+                            html += `
+                                <tr>
+                                    <td>${id.toString()}</td>
+                                    <td>${type}</td>
+                                    <td>${totalDc}</td>
+                                    <td>${filledDc}</td>
+                                    <td>${remainingDc}</td>
+                                    <td>${price}</td>
+                                    <td>${totalValueMATIC}</td>
+                                    <td><span class="order-status ${active ? 'active' : 'filled'}">${active ? '活跃' : '已结束'}</span></td>
+                                    <td>${active && remaining > 0 ? 
+                                        `<button class="order-action-btn" style="background:rgba(244,67,54,0.2);color:#f44336;" data-cancel="${id}">撤销</button>` : 
+                                        '-'}</td>
+                                </tr>
+                            `;
+                        } catch (e) {
+                            console.error('加载订单失败:', e);
+                            continue;
+                        }
+                    }
+                    html += '</tbody></table>';
+                    myOrdersList.innerHTML = html;
+                    // 撤销按钮
+                    document.querySelectorAll('[data-cancel]').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const orderId = parseInt(e.target.dataset.cancel);
+                            cancelOrder(orderId);
+                        });
+                    });
+                } catch (err) {
+                    console.error('加载我的订单失败:', err);
+                    myOrdersList.innerHTML = '<p>加载失败: ' + (err.message || '未知错误') + '</p>';
+                }
+            }
+            
+            placeSellBtn.addEventListener('click', async () => {
+                const dc = parseFloat(document.getElementById('sellDcAmount').value);
+                const price = parseFloat(document.getElementById('sellPrice').value);
+                if (!dc || !price || dc < 1000 || dc % 1000 !== 0) {
+                    showError(placeOrderStatus, 'DC 数量需 ≥1000 且为 1000 的整数倍');
+                    return;
+                }
+                await placeOrder(true, dc, price);
+            });
+            placeBuyBtn.addEventListener('click', async () => {
+                const dc = parseFloat(document.getElementById('buyDcAmount').value);
+                const price = parseFloat(document.getElementById('buyPrice').value);
+                if (!dc || !price || dc < 1000 || dc % 1000 !== 0) {
+                    showError(placeOrderStatus, 'DC 数量需 ≥1000 且为 1000 的整数倍');
+                    return;
+                }
+                await placeOrder(false, dc, price);
+            });
+            refreshOrdersBtn.addEventListener('click', async () => {
+                if (!window.provider || !window.userAddress) return;
+                const cleanup = showLoading(refreshOrdersBtn, '刷新中...');
+                try {
+                    await loadOrderBook();
+                    showToast('订单簿刷新成功！');
+                } catch (err) {
+                    console.error('刷新失败:', err);
+                    showToast('刷新失败');
+                } finally {
+                    cleanup();
+                }
+            });
+            refreshMyOrdersBtn.addEventListener('click', async () => {
+                if (!window.provider || !window.userAddress) return;
+                const cleanup = showLoading(refreshMyOrdersBtn, '刷新中...');
+                try {
+                    await loadMyOrders();
+                    showToast('我的订单刷新成功！');
+                } catch (err) {
+                    console.error('刷新失败:', err);
+                    showToast('刷新失败');
+                } finally {
+                    cleanup();
+                }
+            });
+            async function placeOrder(isSell, dcAmount, pricePerUnit) {
+                if (!window.signer) return;
+                const cleanup = showLoading(isSell ? placeSellBtn : placeBuyBtn, '挂单中...');
+                try {
+                    const dcAmountBase = ethers.utils.parseUnits(dcAmount.toString(), 2);
+                    const priceBase = ethers.utils.parseEther(pricePerUnit.toString());
+                    const dcContract = new ethers.Contract(DC_TOKEN_ADDRESS, ERC20_ABI, window.signer);
+                    const marketContract = new ethers.Contract(MARKET_CONTRACT_ADDRESS, MARKET_CONTRACT_ABI, window.signer);
+                    let tx;
+                    if (isSell) {
+                        // 卖单：检查DC余额并授权
+                        const dcBalance = await dcContract.balanceOf(window.userAddress);
+                        if (dcBalance.lt(dcAmountBase)) {
+                            throw new Error('DC余额不足');
+                        }
+                        // 检查授权额度
+                        const allowance = await dcContract.allowance(window.userAddress, MARKET_CONTRACT_ADDRESS);
+                        if (allowance.lt(dcAmountBase)) {
+                            // 授权
+                            const approveTx = await dcContract.approve(MARKET_CONTRACT_ADDRESS, dcAmountBase);
+                            await approveTx.wait();
+                        }
+                        // 存款到合约（现在直接存入所需金额）
+                        const depositTx = await marketContract.depositDC(dcAmountBase);
+                        await depositTx.wait();
+                        // 挂卖单
+                        tx = await marketContract.placeSellOrder(dcAmountBase, priceBase);
+                    } else {
+                        // 买单：检查MATIC余额
+                        const maticRequired = dcAmountBase.div(UNIT_SIZE_DC).mul(priceBase); // 修正: polRequired -> maticRequired
+                        const maticBalance = await window.provider.getBalance(window.userAddress); // 修正: polBalance -> maticBalance
+                        if (maticBalance.lt(maticRequired)) { // 修正: polBalance -> maticBalance
+                            throw new Error('MATIC余额不足'); // 修正: POL -> MATIC
+                        }
+                        // 存款MATIC到合约
+                        const depositTx = await marketContract.depositMATIC({ value: maticRequired }); // 修正: depositPOL -> depositMATIC
+                        await depositTx.wait();
+                        // 挂买单
+                        tx = await marketContract.placeBuyOrder(dcAmountBase, priceBase);
+                    }
+                    await tx.wait();
+                    showSuccess(placeOrderStatus, '挂单成功！');
+                    // 清空输入
+                    document.getElementById('sellDcAmount').value = '';
+                    document.getElementById('sellPrice').value = '';
+                    document.getElementById('buyDcAmount').value = '';
+                    document.getElementById('buyPrice').value = '';
+                    await loadMarketData();
+                } catch (err) {
+                    console.error(err);
+                    showError(placeOrderStatus, `失败: ${err.reason || err.message}`);
+                } finally {
+                    cleanup();
+                }
+            }
+            async function fillOrder(orderId, dcAmountToTake) {
+                if (!window.signer) return;
+                if (!confirm(`确定要成交此订单吗？
+订单ID: ${orderId}
+数量: ${dcAmountToTake/100} DC`)) return;
+                const cleanup = showLoading(document.querySelector(`[data-id="${orderId}"]`), '成交中...');
+                try {
+                    const marketContract = new ethers.Contract(MARKET_CONTRACT_ADDRESS, MARKET_CONTRACT_ABI, window.signer);
+                    // 获取订单信息
+                    const order = await marketContract.orders(orderId);
+                    const orderType = order.orderType;
+                    // 将dcAmountToTake转换为BigNumber
+                    const dcAmountToTakeBN = ethers.BigNumber.from(dcAmountToTake);
+                    const maticRequired = dcAmountToTakeBN.div(UNIT_SIZE_DC).mul(order.pricePerUnit); // 修正: polRequired -> maticRequired
+                    if (orderType === 1) { // 卖单，需要MATIC
+                        // 检查MATIC余额并存款
+                        const maticBalance = await window.provider.getBalance(window.userAddress); // 修正: polBalance -> maticBalance
+                        if (maticBalance.lt(maticRequired)) { // 修正: polBalance -> maticBalance
+                            throw new Error('MATIC余额不足'); // 修正: POL -> MATIC
+                        }
+                        // 存款MATIC到合约
+                        const depositTx = await marketContract.depositMATIC({ value: maticRequired }); // 修正: depositPOL -> depositMATIC
+                        await depositTx.wait();
+                    } else { // 买单，需要DC
+                        // 检查DC余额并授权
+                        const dcContract = new ethers.Contract(DC_TOKEN_ADDRESS, ERC20_ABI, window.signer);
+                        const dcBalance = await dcContract.balanceOf(window.userAddress);
+                        if (dcBalance.lt(dcAmountToTakeBN)) {
+                            throw new Error('DC余额不足');
+                        }
+                        // 检查授权额度
+                        const allowance = await dcContract.allowance(window.userAddress, MARKET_CONTRACT_ADDRESS);
+                        if (allowance.lt(dcAmountToTakeBN)) {
+                            // 授权
+                            const approveTx = await dcContract.approve(MARKET_CONTRACT_ADDRESS, dcAmountToTakeBN);
+                            await approveTx.wait();
+                        }
+                        // 存款DC到合约
+                        const depositTx = await marketContract.depositDC(dcAmountToTakeBN);
+                        await depositTx.wait();
+                    }
+                    // 成交订单
+                    const tx = await marketContract.fillOrder(orderId, dcAmountToTakeBN);
+                    await tx.wait();
+                    showToast('✅ 成交成功！');
+                    await loadMarketData();
+                } catch (err) {
+                    console.error(err);
+                    alert('❌ 成交失败: ' + (err.reason || err.message));
+                } finally {
+                    cleanup();
+                }
+            }
+            async function cancelOrder(orderId) {
+                if (!window.signer) return;
+                if (!confirm(`确定要撤销订单 ${orderId} 吗？`)) return;
+                const cleanup = showLoading(document.querySelector(`[data-cancel="${orderId}"]`), '撤销中...');
+                try {
+                    const marketContract = new ethers.Contract(MARKET_CONTRACT_ADDRESS, MARKET_CONTRACT_ABI, window.signer);
+                    const tx = await marketContract.cancelOrder(orderId);
+                    await tx.wait();
+                    showToast('✅ 撤单成功！');
+                    await loadMarketData();
+                } catch (err) {
+                    console.error(err);
+                    alert('❌ 撤单失败: ' + (err.reason || err.message));
+                } finally {
+                    cleanup();
+                }
+            }
+            // ========== 个人信息页面逻辑 ==========
+            async function loadProfileData() {
+                if (!window.provider || !window.userAddress) return;
+                try {
+                    const dcContract = new ethers.Contract(DC_TOKEN_ADDRESS, DC_CONTRACT_ABI, window.provider);
+                    // 检查网络
+                    const network = await window.provider.getNetwork();
+                    if (network.chainId !== POLYGON_CHAIN_ID) {
+                        alert('⚠️ 请确保你在 Polygon 主网！');
+                        return;
+                    }
+                    // 加载余额和状态
+                    const [balance, decimals, verifiedStatus, minBalance, voterStatus, lastClaimTime, votingStatus] = await Promise.all([
+                        dcContract.balanceOf(window.userAddress),
+                        dcContract.decimals(),
+                        dcContract.verified(window.userAddress),
+                        dcContract.minbalanceOf(window.userAddress),
+                        dcContract.voter(window.userAddress),
+                        dcContract.lastclaimtime(window.userAddress),
+                        dcContract.voting(window.userAddress)
+                    ]);
+                    // 更新显示
+                    const tokenBalance = document.getElementById('tokenBalance');
+                    const verifyStatus = document.getElementById('verifyStatus');
+                    const voteStatus = document.getElementById('voteStatus');
+                    const minBalanceEl = document.getElementById('minBalance');
+                    tokenBalance.textContent = `${parseFloat(ethers.utils.formatUnits(balance, decimals)).toFixed(2)} DC`;
+                    minBalanceEl.textContent = `${parseFloat(ethers.utils.formatUnits(minBalance, decimals)).toFixed(2)} DC`;
+                    if (verifiedStatus) {
+                        verifyStatus.textContent = '已认证';
+                        verifyStatus.className = 'status positive';
+                        document.getElementById('applySection').style.display = 'none';
+                        // 如果已经是验证者，隐藏"获取投票权"板块
+                        if (voterStatus) {
+                            voterSection.style.display = 'none';
+                            voteStatus.textContent = '验证者';
+                            voteStatus.className = 'status positive';
                         } else {
-                            html += `<p class="status neutral">您需要成为验证者并完成身份认证才能投票。</p>`;
+                            voterSection.style.display = 'block';
+                            voteStatus.textContent = '无投票权';
+                            voteStatus.className = 'status negative';
                         }
                     } else {
-                        html += `<p class="status neutral">该申请已结束投票。</p>`;
+                        verifyStatus.textContent = '未认证';
+                        verifyStatus.className = 'status negative';
+                        document.getElementById('applySection').style.display = 'block';
+                        voterSection.style.display = 'none';
+                        voteStatus.textContent = '无投票权';
+                        voteStatus.className = 'status negative';
                     }
-                    document.getElementById('pendingApplication').innerHTML = html;
-
-                    document.getElementById('voteApproveBtn')?.addEventListener('click', () => castVote(firstApplicant, true));
-                    document.getElementById('voteRejectBtn')?.addEventListener('click', () => castVote(firstApplicant, false));
+                    // 更新铸造状态
+                    const now = Math.floor(Date.now() / 1000);
+                    const canClaim = lastClaimTime.toNumber() === 0 || (now - lastClaimTime.toNumber()) >= 86400;
+                    if (verifiedStatus) {
+                        if (canClaim) {
+                            mintStatusBlock.innerHTML = `
+                                <p>可以领取每日空投</p>
+                                <button class="claim-btn" id="mintBtn" style="background: linear-gradient(135deg, #4caf50, #81c784);">
+                                    <i class="fas fa-hammer"></i> 领取 1000 DC
+                                </button>
+                            `;
+                            document.getElementById('mintBtn').addEventListener('click', async () => {
+                                await mintTokens(dcContract);
+                            });
+                        } else {
+                            const nextClaim = lastClaimTime.toNumber() + 86400;
+                            const timeLeft = nextClaim - now;
+                            const hours = Math.floor(timeLeft / 3600);
+                            const minutes = Math.floor((timeLeft % 3600) / 60);
+                            mintStatusBlock.innerHTML = `
+                                <p>下次领取时间: ${new Date(nextClaim * 1000).toLocaleString()}</p>
+                                <p>还需等待: ${hours}小时${minutes}分钟</p>
+                                <button class="claim-btn" disabled>
+                                    <i class="fas fa-clock"></i> 冷却中
+                                </button>
+                            `;
+                        }
+                    } else {
+                        mintStatusBlock.innerHTML = '<p>需要先完成身份认证才能领取每日空投</p>';
+                    }
+                    // 加载待处理申请
+                    await loadPendingApplications(dcContract);
+                    await loadMyVoteProgress(dcContract);
+                    // 更新领取奖励板块
+                    await updateRewardSection(dcContract, voterStatus, votingStatus);
                 } catch (err) {
-                    console.error('加载申请失败:', err);
-                    document.getElementById('pendingApplication').innerHTML = `<p class="status negative">加载失败：${err.message}</p>`;
+                    console.error('加载个人信息失败:', err);
+                    showError(document.getElementById('applyStatus'), '加载失败：' + (err.message || '请确保你在 Polygon 主网'));
                 }
             }
-
-            async function castVote(target, approve) {
-                if (!signer) return;
+            async function updateRewardSection(dcContract, voterStatus, votingStatus) {
+                // 显示或隐藏奖励板块
+                if (voterStatus) {
+                    rewardSection.style.display = 'block';
+                    if (votingStatus) {
+                        // 正在投票中，显示奖励信息
+                        const voteto = await dcContract.voteto(window.userAddress);
+                        const agreeCount = await dcContract.agree(voteto);
+                        const opposeCount = await dcContract.opposition(voteto);
+                        const totalVotes = agreeCount.add(opposeCount).toNumber();
+                        rewardInfo.innerHTML = `
+                            <p>投票结果一致可领取 <strong class="highlight">2000 DC</strong> 奖励。</p>
+                            <p>当前投票进度: ${totalVotes}/100 票</p>
+                            <p>投票对象: ${voteto.substring(0,8)}...${voteto.substring(voteto.length-6)}</p>
+                            <p>同意票: ${agreeCount.toString()}, 反对票: ${opposeCount.toString()}</p>
+                        `;
+                        // 如果投票已满100票，可以领取奖励
+                        if (totalVotes >= 100) {
+                            claimRewardBtn.disabled = false;
+                            claimRewardBtn.innerHTML = '<i class="fas fa-gift"></i> 领取投票奖励';
+                        } else {
+                            claimRewardBtn.disabled = true;
+                            claimRewardBtn.innerHTML = '<i class="fas fa-clock"></i> 投票未完成';
+                        }
+                    } else {
+                        // 没有正在投票
+                        rewardInfo.innerHTML = `
+                            <p>目前没有正在进行的投票。</p>
+                            <p>请先参与投票，投票结果一致后可领取 <strong class="highlight">2000 DC</strong> 奖励。</p>
+                        `;
+                        claimRewardBtn.disabled = true;
+                        claimRewardBtn.innerHTML = '<i class="fas fa-info-circle"></i> 暂无奖励可领取';
+                    }
+                } else {
+                    // 不是验证者，隐藏奖励板块
+                    rewardSection.style.display = 'none';
+                }
+            }
+            async function mintTokens(dcContract) {
+                if (!window.signer) return;
                 try {
-                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, signer);
-                    const tx = await contract.vote(target, approve);
-                    alert(`正在提交${approve ? '同意' : '反对'}票...`);
+                    const contractWithSigner = dcContract.connect(window.signer);
+                    const tx = await contractWithSigner.claim();
                     await tx.wait();
-                    alert('投票成功！');
-                    loadPendingApplication();
-                    loadMyVoteProgress();
+                    showToast('✅ 领取成功！');
+                    await loadProfileData();
                 } catch (err) {
-                    console.error(err);
-                    alert(`投票失败：${err.reason || err.message}`);
+                    console.error('领取失败:', err);
+                    alert('领取失败: ' + (err.reason || err.message));
                 }
             }
-
-            async function loadMyVoteProgress() {
-                if (!provider || !userAddress) return;
+            // 提交身份认证申请
+            document.getElementById('applyBtn').addEventListener('click', async () => {
+                if (!window.signer) return;
+                const url = document.getElementById('identityURL').value;
+                if (!url) {
+                    alert('请输入身份证明URL');
+                    return;
+                }
                 try {
-                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, provider);
-                    const isVoting = await contract.voting(userAddress);
-                    if (!isVoting) {
-                        document.getElementById('myVoteProgress').innerHTML = '<p>您当前未参与投票。</p>';
+                    const dcContract = new ethers.Contract(DC_TOKEN_ADDRESS, DC_CONTRACT_ABI, window.signer);
+                    const contractWithSigner = dcContract.connect(window.signer);
+                    const tx = await contractWithSigner.application(url);
+                    await tx.wait();
+                    showToast('✅ 申请提交成功！');
+                    document.getElementById('identityURL').value = '';
+                    await loadProfileData();
+                } catch (err) {
+                    console.error('提交申请失败:', err);
+                    alert('提交失败: ' + (err.reason || err.message));
+                }
+            });
+            // 成为验证者
+            becomeVoterBtn.addEventListener('click', async () => {
+                if (!window.signer) return;
+                const cleanup = showLoading(becomeVoterBtn, '申请中...');
+                try {
+                    const dcContract = new ethers.Contract(DC_TOKEN_ADDRESS, DC_CONTRACT_ABI, window.signer);
+                    const contractWithSigner = dcContract.connect(window.signer);
+                    const tx = await contractWithSigner.bevoter();
+                    await tx.wait();
+                    showToast('✅ 已成为验证者！');
+                    await loadProfileData();
+                } catch (err) {
+                    console.error('成为验证者失败:', err);
+                    showError(document.getElementById('voterStatus'), '失败: ' + (err.reason || err.message));
+                } finally {
+                    cleanup();
+                }
+            });
+            // 领取投票奖励
+            claimRewardBtn.addEventListener('click', async () => {
+                if (!window.signer) return;
+                const cleanup = showLoading(claimRewardBtn, '领取中...');
+                try {
+                    const dcContract = new ethers.Contract(DC_TOKEN_ADDRESS, DC_CONTRACT_ABI, window.signer);
+                    const contractWithSigner = dcContract.connect(window.signer);
+                    const tx = await contractWithSigner.getrewards();
+                    await tx.wait();
+                    showToast('✅ 奖励领取成功！');
+                    await loadProfileData();
+                } catch (err) {
+                    console.error('领取奖励失败:', err);
+                    showError(document.getElementById('rewardStatus'), '领取失败: ' + (err.reason || err.message));
+                } finally {
+                    cleanup();
+                }
+            });
+            async function loadPendingApplications(dcContract) {
+                try {
+                    const count = await dcContract.refreshapplicants();
+                    const container = document.getElementById('pendingApplication');
+                    if (count.toNumber() === 0) {
+                        container.innerHTML = '<p>暂无待处理的申请</p>';
                         return;
                     }
-                    const target = await contract.voteto(userAddress);
-                    const myVote = await contract.voteto_pass(userAddress);
-                    const agree = await contract.agree(target);
-                    const oppose = await contract.opposition(target);
-                    const total = agree.add(oppose).toNumber();
-                    const isApplying = await contract.isappling(target);
-
-                    let html = `<p>您正在对 <strong>${target}</strong> 进行投票</p>`;
-                    html += `<p>您的投票：${myVote ? '同意' : '反对'}</p>`;
-                    html += `<p>当前票数：同意 ${agree.toNumber()}，反对 ${oppose.toNumber()}（共 ${total} 票）</p>`;
-                    if (!isApplying || total >= 100) {
-                        html += `<p class="status positive">投票已结束！</p>`;
+                    let html = `<p>共有 ${count.toString()} 个待处理申请：</p><ul style="margin-left: 1.5rem;">`;
+                    for (let i = 0; i < Math.min(count.toNumber(), 5); i++) {
+                        const applicant = await dcContract.get_address_from_applylist(i);
+                        const url = await dcContract.application_URL(applicant);
+                        const agreeCount = await dcContract.agree(applicant);
+                        const opposeCount = await dcContract.opposition(applicant);
+                        html += `
+                            <li style="margin-bottom: 1rem;">
+                                <div>申请人: ${applicant.substring(0,8)}...${applicant.substring(applicant.length-6)}</div>
+                                <div>同意: ${agreeCount.toString()}, 反对: ${opposeCount.toString()}</div>
+                                <div>证明: <a href="${url}" target="_blank" style="color: var(--secondary-color);">查看</a></div>
+                                <div style="margin-top: 0.5rem;">
+                                    <button class="order-action-btn buy" data-vote="${applicant}" data-approve="true" style="margin-right: 0.5rem;">同意</button>
+                                    <button class="order-action-btn sell" data-vote="${applicant}" data-approve="false">反对</button>
+                                </div>
+                            </li>
+                        `;
                     }
-                    document.getElementById('myVoteProgress').innerHTML = html;
+                    html += '</ul>';
+                    container.innerHTML = html;
+                    // 添加投票按钮事件
+                    document.querySelectorAll('[data-vote]').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            const applicant = e.target.dataset.vote;
+                            const approve = e.target.dataset.approve === 'true';
+                            await vote(applicant, approve);
+                        });
+                    });
+                } catch (err) {
+                    console.error('加载申请列表失败:', err);
+                }
+            }
+            async function vote(applicant, approve) {
+                if (!window.signer) return;
+                if (!confirm(`确定要投${approve ? '同意' : '反对'}票吗？
+申请人: ${applicant}`)) return;
+                const cleanup = showLoading(document.querySelector(`[data-vote="${applicant}"]`), '投票中...');
+                try {
+                    const dcContract = new ethers.Contract(DC_TOKEN_ADDRESS, DC_CONTRACT_ABI, window.signer);
+                    const contractWithSigner = dcContract.connect(window.signer);
+                    const tx = await contractWithSigner.vote(applicant, approve);
+                    await tx.wait();
+                    showToast(`✅ ${approve ? '同意' : '反对'}票提交成功！`);
+                    await loadProfileData();
+                } catch (err) {
+                    console.error('投票失败:', err);
+                    alert('投票失败: ' + (err.reason || err.message));
+                } finally {
+                    cleanup();
+                }
+            }
+            async function loadMyVoteProgress(dcContract) {
+                try {
+                    const container = document.getElementById('myVoteProgress');
+                    const voting = await dcContract.voting(window.userAddress);
+                    if (!voting) {
+                        container.innerHTML = '<p>暂无进行中的投票</p>';
+                        return;
+                    }
+                    const voteto = await dcContract.voteto(window.userAddress);
+                    const votetoPass = await dcContract.voteto_pass(window.userAddress);
+                    const agreeCount = await dcContract.agree(voteto);
+                    const opposeCount = await dcContract.opposition(voteto);
+                    const totalVotes = agreeCount.add(opposeCount).toNumber();
+                    container.innerHTML = `
+                        <p>正在投票给: ${voteto.substring(0,8)}...${voteto.substring(voteto.length-6)}</p>
+                        <p>你的选择: ${votetoPass ? '同意' : '反对'}</p>
+                        <p>当前票数: 同意 ${agreeCount.toString()}, 反对 ${opposeCount.toString()}</p>
+                        <p>进度: ${totalVotes}/100</p>
+                    `;
                 } catch (err) {
                     console.error('加载投票进度失败:', err);
-                    document.getElementById('myVoteProgress').innerHTML = `<p class="status negative">加载失败：${err.message}</p>`;
                 }
             }
-
-            document.getElementById('claimRewardBtn')?.addEventListener('click', async () => {
-                if (!provider || !signer || !userAddress) return;
-                try {
-                    const contract = new ethers.Contract(DC_CONTRACT_ADDRESS, DC_CONTRACT_ABI, signer);
-                    const tx = await contract.getrewards();
-                    document.getElementById('rewardStatus').innerHTML = '<span class="status neutral">领取中...</span>';
-                    await tx.wait();
-                    document.getElementById('rewardStatus').innerHTML = '<span class="status positive">✅ 奖励已领取！</span>';
-                    getUserProfileData();
-                } catch (err) {
-                    console.error(err);
-                    document.getElementById('rewardStatus').innerHTML = `<span class="status negative">❌ 领取失败：${err.reason || err.message}</span>`;
-                }
-            });
-
-            // ========== 自动检测已连接钱包 ==========
-            if (window.ethereum) {
-                window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
-                    if (accounts.length > 0) {
-                        window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
-                            if (parseInt(chainId, 16) === POLYGON_CHAIN_ID) {
-                                provider = new ethers.providers.Web3Provider(window.ethereum);
-                                signer = provider.getSigner();
-                                userAddress = accounts[0];
-                                currentWallet = 'metamask';
-                                updateWalletInfo('metamask');
-                                walletSelect.value = 'metamask';
-                                getUserProfileData();
-                            }
-                        }).catch(console.error);
-                    }
-                }).catch(console.error);
-            }
-
-            // ========== 钱包事件监听 ==========
-            currentProviderInstance = null;
-            connectWalletBtn.addEventListener('click', async () => {
-                const selectedWallet = walletSelect.value;
-                const providerInstance = getInjectedProvider(selectedWallet);
-                if (providerInstance && !currentProviderInstance) {
-                    currentProviderInstance = providerInstance;
-                    providerInstance.on('accountsChanged', (accounts) => {
-                        if (accounts.length > 0 && accounts[0] !== userAddress) {
-                            userAddress = accounts[0];
-                            updateWalletInfo(currentWallet);
-                            getUserProfileData();
-                        } else {
-                            disconnectBtn.click();
-                        }
-                    });
-                    providerInstance.on('chainChanged', (chainId) => {
-                        if (parseInt(chainId, 16) !== POLYGON_CHAIN_ID) {
-                            alert('请切换到 Polygon 主网！');
-                            disconnectBtn.click();
-                        } else {
-                            getUserProfileData();
-                        }
-                    });
-                }
-            });
         });
     </script>
 </body>
 </html>
-
