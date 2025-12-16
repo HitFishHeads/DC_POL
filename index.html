@@ -707,6 +707,33 @@
             gap: 1rem;
             margin-top: 1rem;
         }
+        /* 新增样式：部分成交输入框 */
+        .partial-fill-input {
+            width: 120px;
+            padding: 0.4rem;
+            background: var(--bg-card);
+            color: #e0e0e0;
+            border: 1px solid rgba(129,199,132,0.2);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+            text-align: right;
+        }
+        .partial-fill-input::placeholder {
+            color: #888;
+        }
+        .partial-fill-label {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            margin-right: 0.5rem;
+        }
+        .partial-fill-group {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
         /* 新增样式 */
         .loading-spinner {
             display: inline-block;
@@ -844,6 +871,14 @@
                 flex-direction: column;
                 align-items: center;
                 text-align: center;
+            }
+            /* 响应式调整部分成交输入框 */
+            .partial-fill-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .partial-fill-input {
+                width: 100%;
             }
         }
     </style>
@@ -1050,7 +1085,7 @@
                         <p>DC合约地址：<span class="highlight">0x8Cb3bA05Efa695799E1cF0A2d2921e2387CbFB2C</span></p>
                         <p>市场合约地址：<span class="highlight">0xD0A346783518d19A9167aDA8476178bE586D7Df3</span></p>
                         <p>代币名称：<span class="highlight">DeCurrency (DC)</span></p>
-                        <p>代币小数位：<span class="highlight">2位</span></p>
+                        <p>代票小数位：<span class="highlight">2位</span></p>
                     </div>
                     <section class="section">
                         <h2>如何获取DC系统身份</h2>
@@ -1819,7 +1854,17 @@
                                 <td>${(o.remaining / 100).toFixed(0)}</td>
                                 <td>${o.price.toFixed(6)}</td>
                                 <td>${o.totalValue.toFixed(4)}</td>
-                                <td><button class="order-action-btn buy" data-id="${o.id}" data-amount="${o.remaining}">买入</button></td>
+                                <td>
+                                    <div class="partial-fill-group">
+                                        <span class="partial-fill-label">数量:</span>
+                                        <input type="number" class="partial-fill-input" data-order-id="${o.id}" 
+                                               placeholder="${(o.remaining / 100).toFixed(0)}" 
+                                               min="1000" max="${(o.remaining / 100).toFixed(0)}" step="1000"
+                                               style="width: 80px;">
+                                        <span>DC</span>
+                                        <button class="order-action-btn buy" data-id="${o.id}">买入</button>
+                                    </div>
+                                </td>
                             `;
                             askBody.appendChild(row);
                         });
@@ -1839,7 +1884,17 @@
                                 <td>${(o.remaining / 100).toFixed(0)}</td>
                                 <td>${o.price.toFixed(6)}</td>
                                 <td>${o.totalValue.toFixed(4)}</td>
-                                <td><button class="order-action-btn sell" data-id="${o.id}" data-amount="${o.remaining}">卖出</button></td>
+                                <td>
+                                    <div class="partial-fill-group">
+                                        <span class="partial-fill-label">数量:</span>
+                                        <input type="number" class="partial-fill-input" data-order-id="${o.id}" 
+                                               placeholder="${(o.remaining / 100).toFixed(0)}" 
+                                               min="1000" max="${(o.remaining / 100).toFixed(0)}" step="1000"
+                                               style="width: 80px;">
+                                        <span>DC</span>
+                                        <button class="order-action-btn sell" data-id="${o.id}">卖出</button>
+                                    </div>
+                                </td>
                             `;
                             bidBody.appendChild(row);
                         });
@@ -1848,7 +1903,28 @@
                     document.querySelectorAll('.order-action-btn').forEach(btn => {
                         btn.addEventListener('click', (e) => {
                             const orderId = parseInt(e.target.dataset.id);
-                            const amount = parseInt(e.target.dataset.amount);
+                            const row = e.target.closest('tr');
+                            const input = row.querySelector('.partial-fill-input');
+                            let amount;
+                            
+                            // 如果用户输入了数量，使用输入的数量
+                            if (input && input.value) {
+                                const userAmount = parseInt(input.value);
+                                if (isNaN(userAmount) || userAmount < 1000) {
+                                    alert('请输入有效的DC数量（至少1000 DC）');
+                                    return;
+                                }
+                                if (userAmount % 1000 !== 0) {
+                                    alert('DC数量必须是1000的整数倍');
+                                    return;
+                                }
+                                // 转换为合约单位（乘以100，因为DC有2位小数）
+                                amount = userAmount * 100;
+                            } else {
+                                // 如果用户没有输入，使用订单的剩余数量
+                                amount = parseInt(e.target.dataset.amount);
+                            }
+                            
                             fillOrder(orderId, amount);
                         });
                     });
@@ -2024,9 +2100,14 @@
             }
             async function fillOrder(orderId, dcAmountToTake) {
                 if (!window.signer) return;
+                
+                // 计算实际DC数量（用于显示）
+                const dcAmount = dcAmountToTake / 100;
+                
                 if (!confirm(`确定要成交此订单吗？
 订单ID: ${orderId}
-数量: ${dcAmountToTake/100} DC`)) return;
+数量: ${dcAmount} DC`)) return;
+                
                 const cleanup = showLoading(document.querySelector(`[data-id="${orderId}"]`), '成交中...');
                 try {
                     const marketContract = new ethers.Contract(MARKET_CONTRACT_ADDRESS, MARKET_CONTRACT_ABI, window.signer);
@@ -2066,7 +2147,7 @@
                     // 成交订单
                     const tx = await marketContract.fillOrder(orderId, dcAmountToTakeBN);
                     await tx.wait();
-                    showToast('✅ 成交成功！');
+                    showToast(`✅ 成交成功！成交 ${dcAmount} DC`);
                     await loadMarketData();
                 } catch (err) {
                     console.error(err);
