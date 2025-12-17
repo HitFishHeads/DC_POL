@@ -1405,7 +1405,7 @@
             const MARKET_CONTRACT_ABI = [
                 "function nextOrderId() view returns (uint256)",
                 "function orders(uint256) view returns (address owner, uint8 orderType, uint256 dcAmount, uint256 pricePerUnit, uint256 filled, bool active)",
-                "function pendingMATIC(address) view returns (uint256)", // 修正: pendingPOL -> pendingMATIC
+                "function pendingMATIC(address) view returns (uint256)",
                 "function pendingDC(address) view returns (uint256)",
                 "function placeBuyOrder(uint256 dcAmount, uint256 pricePerUnit)",
                 "function placeSellOrder(uint256 dcAmount, uint256 pricePerUnit)",
@@ -1413,14 +1413,14 @@
                 "function cancelOrder(uint256 orderId)",
                 "function claimAll()",
                 "function depositDC(uint256 amount)",
-                "function depositMATIC() payable", // 修正: depositPOL -> depositMATIC
+                "function depositMATIC() payable",
                 "function withdrawDC(uint256 amount)",
-                "function withdrawMATIC(uint256 amount)", // 修正: withdrawPOL -> withdrawMATIC
+                "function withdrawMATIC(uint256 amount)",
                 "function depositedDC(address) view returns (uint256)",
-                "function depositedMATIC(address) view returns (uint256)", // 修正: depositedPOL -> depositedMATIC
+                "function depositedMATIC(address) view returns (uint256)",
                 "function getUserOrderIds(address user) view returns (uint256[] memory)"
             ];
-            // DC合约ABI
+            // DC合约ABI - 添加isappling函数
             const DC_CONTRACT_ABI = [
                 'function balanceOf(address) view returns (uint256)',
                 'function decimals() view returns (uint8)',
@@ -1464,10 +1464,10 @@
             const marketWalletNotConnected = document.getElementById('marketWalletNotConnected');
             const marketConnectedPanel = document.getElementById('marketConnectedPanel');
             const marketDcBalance = document.getElementById('marketDcBalance');
-            const marketMaticBalance = document.getElementById('marketMaticBalance'); // 修正: marketPolBalance -> marketMaticBalance
+            const marketMaticBalance = document.getElementById('marketMaticBalance');
             const pendingDC = document.getElementById('pendingDC');
-            const pendingMATIC = document.getElementById('pendingMATIC'); // 修正: pendingPOL -> pendingMATIC
-            const marketClaimArea = document.getElementById('marketClaimArea'); // 新增
+            const pendingMATIC = document.getElementById('pendingMATIC');
+            const marketClaimArea = document.getElementById('marketClaimArea');
             const placeSellBtn = document.getElementById('placeSellBtn');
             const placeBuyBtn = document.getElementById('placeBuyBtn');
             const askBody = document.getElementById('askBody');
@@ -1512,7 +1512,7 @@
                                 params: [{
                                     chainId: '0x89',
                                     chainName: 'Polygon Mainnet',
-                                    nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 }, // 修正: POL -> MATIC
+                                    nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
                                     rpcUrls: ['https://polygon-rpc.com/'],
                                     blockExplorerUrls: ['https://polygonscan.com/']
                                 }]
@@ -1653,13 +1653,13 @@
                     profileInfo.style.display = 'none';
                     // 清除市场页面数据
                     marketDcBalance.textContent = '0.00 DC';
-                    marketMaticBalance.textContent = '0.00 MATIC'; // 修正: POL -> MATIC
+                    marketMaticBalance.textContent = '0.00 MATIC';
                     pendingDC.textContent = '0';
-                    pendingMATIC.textContent = '0'; // 修正: pendingPOL -> pendingMATIC
+                    pendingMATIC.textContent = '0';
                     askBody.innerHTML = '';
                     bidBody.innerHTML = '';
                     myOrdersList.innerHTML = '<p>已断开连接</p>';
-                    marketClaimArea.innerHTML = ''; // 清空领取按钮
+                    marketClaimArea.innerHTML = '';
                 }
             }
             function setupWalletListeners(providerInstance) {
@@ -1736,18 +1736,18 @@
                         return;
                     }
                     // 加载余额
-                    const [dcBalance, dcDecimals, maticBalance, pendingDCBal, pendingMATICBal] = await Promise.all([ // 修正: polBalance -> maticBalance, pendingPOLBal -> pendingMATICBal
+                    const [dcBalance, dcDecimals, maticBalance, pendingDCBal, pendingMATICBal] = await Promise.all([
                         dcContract.balanceOf(window.userAddress),
                         dcContract.decimals(),
                         window.provider.getBalance(window.userAddress),
                         marketContract.pendingDC(window.userAddress),
-                        marketContract.pendingMATIC(window.userAddress) // 修正: pendingPOL -> pendingMATIC
+                        marketContract.pendingMATIC(window.userAddress)
                     ]);
                     // 更新显示
                     marketDcBalance.textContent = `${parseFloat(ethers.utils.formatUnits(dcBalance, dcDecimals)).toFixed(2)} DC`;
-                    marketMaticBalance.textContent = `${parseFloat(ethers.utils.formatEther(maticBalance)).toFixed(4)} MATIC`; // 修正: POL -> MATIC
+                    marketMaticBalance.textContent = `${parseFloat(ethers.utils.formatEther(maticBalance)).toFixed(4)} MATIC`;
                     pendingDC.textContent = parseFloat(ethers.utils.formatUnits(pendingDCBal, 2)).toFixed(2);
-                    pendingMATIC.textContent = parseFloat(ethers.utils.formatEther(pendingMATICBal)).toFixed(4); // 修正: pendingPOL -> pendingMATIC
+                    pendingMATIC.textContent = parseFloat(ethers.utils.formatEther(pendingMATICBal)).toFixed(4);
                     
                     // 判断是否有待领取收入
                     const hasPendingDC = pendingDCBal.gt(0);
@@ -1934,7 +1934,7 @@
                     bidBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">加载失败</td></tr>';
                 }
             }
-            // 修复：使用getUserOrderIds获取用户订单
+            
             async function loadMyOrders(marketContract) {
                 if (!marketContract) {
                     marketContract = new ethers.Contract(MARKET_CONTRACT_ADDRESS, MARKET_CONTRACT_ABI, window.provider);
@@ -2072,13 +2072,13 @@
                         tx = await marketContract.placeSellOrder(dcAmountBase, priceBase);
                     } else {
                         // 买单：检查MATIC余额
-                        const maticRequired = dcAmountBase.div(UNIT_SIZE_DC).mul(priceBase); // 修正: polRequired -> maticRequired
-                        const maticBalance = await window.provider.getBalance(window.userAddress); // 修正: polBalance -> maticBalance
-                        if (maticBalance.lt(maticRequired)) { // 修正: polBalance -> maticBalance
-                            throw new Error('MATIC余额不足'); // 修正: POL -> MATIC
+                        const maticRequired = dcAmountBase.div(UNIT_SIZE_DC).mul(priceBase);
+                        const maticBalance = await window.provider.getBalance(window.userAddress);
+                        if (maticBalance.lt(maticRequired)) {
+                            throw new Error('MATIC余额不足');
                         }
                         // 存款MATIC到合约
-                        const depositTx = await marketContract.depositMATIC({ value: maticRequired }); // 修正: depositPOL -> depositMATIC
+                        const depositTx = await marketContract.depositMATIC({ value: maticRequired });
                         await depositTx.wait();
                         // 挂买单
                         tx = await marketContract.placeBuyOrder(dcAmountBase, priceBase);
@@ -2116,15 +2116,15 @@
                     const orderType = order.orderType;
                     // 将dcAmountToTake转换为BigNumber
                     const dcAmountToTakeBN = ethers.BigNumber.from(dcAmountToTake);
-                    const maticRequired = dcAmountToTakeBN.div(UNIT_SIZE_DC).mul(order.pricePerUnit); // 修正: polRequired -> maticRequired
+                    const maticRequired = dcAmountToTakeBN.div(UNIT_SIZE_DC).mul(order.pricePerUnit);
                     if (orderType === 1) { // 卖单，需要MATIC
                         // 检查MATIC余额并存款
-                        const maticBalance = await window.provider.getBalance(window.userAddress); // 修正: polBalance -> maticBalance
-                        if (maticBalance.lt(maticRequired)) { // 修正: polBalance -> maticBalance
-                            throw new Error('MATIC余额不足'); // 修正: POL -> MATIC
+                        const maticBalance = await window.provider.getBalance(window.userAddress);
+                        if (maticBalance.lt(maticRequired)) {
+                            throw new Error('MATIC余额不足');
                         }
                         // 存款MATIC到合约
-                        const depositTx = await marketContract.depositMATIC({ value: maticRequired }); // 修正: depositPOL -> depositMATIC
+                        const depositTx = await marketContract.depositMATIC({ value: maticRequired });
                         await depositTx.wait();
                     } else { // 买单，需要DC
                         // 检查DC余额并授权
@@ -2263,6 +2263,7 @@
                     showError(document.getElementById('applyStatus'), '加载失败：' + (err.message || '请确保你在 Polygon 主网'));
                 }
             }
+            // 修复的updateRewardSection函数，支持两种领取奖励的情况
             async function updateRewardSection(dcContract, voterStatus, votingStatus) {
                 // 显示或隐藏奖励板块
                 if (voterStatus) {
@@ -2272,15 +2273,21 @@
                         const voteto = await dcContract.voteto(window.userAddress);
                         const agreeCount = await dcContract.agree(voteto);
                         const opposeCount = await dcContract.opposition(voteto);
+                        const isApplying = await dcContract.isappling(voteto);
                         const totalVotes = agreeCount.add(opposeCount).toNumber();
+                        
                         rewardInfo.innerHTML = `
                             <p>投票结果一致可领取 <strong class="highlight">2000 DC</strong> 奖励。</p>
                             <p>当前投票进度: ${totalVotes}/100 票</p>
                             <p>投票对象: ${voteto.substring(0,8)}...${voteto.substring(voteto.length-6)}</p>
                             <p>同意票: ${agreeCount.toString()}, 反对票: ${opposeCount.toString()}</p>
+                            <p>申请状态: ${isApplying ? '申请中' : '已处理'}</p>
                         `;
-                        // 如果投票已满100票，可以领取奖励
-                        if (totalVotes >= 100) {
+                        
+                        // 修复：两种情况都可以领取奖励
+                        // 1. 总票数达到100票
+                        // 2. 申请已经被处理（isappling为false）且总票数小于100
+                        if (totalVotes >= 100 || !isApplying) {
                             claimRewardBtn.disabled = false;
                             claimRewardBtn.innerHTML = '<i class="fas fa-gift"></i> 领取投票奖励';
                         } else {
