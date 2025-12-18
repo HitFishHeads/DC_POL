@@ -2229,9 +2229,9 @@
                     if (verifiedStatus) {
                         if (canClaim) {
                             mintStatusBlock.innerHTML = `
-                                <p>可以领取每日空投</p>
+                                <p>可铸造DC</p>
                                 <button class="claim-btn" id="mintBtn" style="background: linear-gradient(135deg, #4caf50, #81c784);">
-                                    <i class="fas fa-hammer"></i> 领取 1000 DC
+                                    <i class="fas fa-hammer"></i> 铸造 1000 DC
                                 </button>
                             `;
                             document.getElementById('mintBtn').addEventListener('click', async () => {
@@ -2243,7 +2243,7 @@
                             const hours = Math.floor(timeLeft / 3600);
                             const minutes = Math.floor((timeLeft % 3600) / 60);
                             mintStatusBlock.innerHTML = `
-                                <p>下次领取时间: ${new Date(nextClaim * 1000).toLocaleString()}</p>
+                                <p>下次铸造时间: ${new Date(nextClaim * 1000).toLocaleString()}</p>
                                 <p>还需等待: ${hours}小时${minutes}分钟</p>
                                 <button class="claim-btn" disabled>
                                     <i class="fas fa-clock"></i> 冷却中
@@ -2251,7 +2251,7 @@
                             `;
                         }
                     } else {
-                        mintStatusBlock.innerHTML = '<p>需要先完成身份认证才能领取每日空投</p>';
+                        mintStatusBlock.innerHTML = '<p>需要先完成身份认证才能每日铸造DC</p>';
                     }
                     // 加载待处理申请
                     await loadPendingApplications(dcContract);
@@ -2314,11 +2314,11 @@
                     const contractWithSigner = dcContract.connect(window.signer);
                     const tx = await contractWithSigner.claim();
                     await tx.wait();
-                    showToast('✅ 领取成功！');
+                    showToast('✅ 铸造成功！');
                     await loadProfileData();
                 } catch (err) {
-                    console.error('领取失败:', err);
-                    alert('领取失败: ' + (err.reason || err.message));
+                    console.error('铸造失败:', err);
+                    alert('铸造失败: ' + (err.reason || err.message));
                 }
             }
             // 提交身份认证申请
