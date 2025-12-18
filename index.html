@@ -948,7 +948,7 @@
                 <!-- ========== 市场页面 ========== -->
                 <div id="market-page" class="page">
                     <section class="section">
-                        <h2>DC/MATIC 交易市场</h2>
+                        <h2>DC/POL 交易市场</h2>
                         <!-- 钱包未连接提示 -->
                         <div id="marketWalletNotConnected" class="wallet-not-connected" style="display: none;">
                             <p>请先连接钱包以查看余额、挂单和交易。</p>
@@ -962,13 +962,13 @@
                                     <p id="marketDcBalance">0.00 DC</p>
                                 </div>
                                 <div class="info-card">
-                                    <h4><i class="fas fa-coins"></i> MATIC 余额</h4>
-                                    <p id="marketMaticBalance">0.00 MATIC</p>
+                                    <h4><i class="fas fa-coins"></i> POL余额</h4>
+                                    <p id="marketMaticBalance">0.00 POL</p>
                                 </div>
                                 <div class="info-card">
                                     <h4><i class="fas fa-gift"></i> 待领取收入</h4>
                                     <p>待领取DC: <span id="pendingDC">0</span></p>
-                                    <p>待领取MATIC: <span id="pendingMATIC">0</span></p>
+                                    <p>待领取POL: <span id="pendingMATIC">0</span></p>
                                     <div id="marketClaimArea">
                                         <!-- 这里会根据是否有收入动态显示按钮 -->
                                     </div>
@@ -982,7 +982,7 @@
                                 <div class="form-group">
                                     <label>卖出 DC（卖单）</label>
                                     <input type="number" id="sellDcAmount" placeholder="DC 数量（1000 的整数倍）" step="1000" min="1000">
-                                    <input type="number" id="sellPrice" placeholder="每 1000 DC 价格（MATIC）" step="0.000001" min="0.000001">
+                                    <input type="number" id="sellPrice" placeholder="每 1000 DC 价格（POL）" step="0.000001" min="0.000001">
                                     <div class="btn-row">
                                         <button class="claim-btn" id="placeSellBtn" style="background: linear-gradient(135deg, #f44336, #ff8a80);">
                                             <i class="fas fa-arrow-down"></i> 挂卖单
@@ -992,7 +992,7 @@
                                 <div class="form-group">
                                     <label>买入 DC（买单）</label>
                                     <input type="number" id="buyDcAmount" placeholder="DC 数量（1000 的整数倍）" step="1000" min="1000">
-                                    <input type="number" id="buyPrice" placeholder="每 1000 DC 价格（MATIC）" step="0.000001" min="0.000001">
+                                    <input type="number" id="buyPrice" placeholder="每 1000 DC 价格（POL）" step="0.000001" min="0.000001">
                                     <div class="btn-row">
                                         <button class="claim-btn" id="placeBuyBtn" style="background: linear-gradient(135deg, #4caf50, #81c784);">
                                             <i class="fas fa-arrow-up"></i> 挂买单
@@ -1015,8 +1015,8 @@
                                             <th>卖家</th>
                                             <th>DC 数量</th>
                                             <th>未成交</th>
-                                            <th>价格 (MATIC/1000DC)</th>
-                                            <th>总价值 (MATIC)</th>
+                                            <th>价格 (POL/1000DC)</th>
+                                            <th>总价值 (POL)</th>
                                             <th>操作</th>
                                         </tr>
                                     </thead>
@@ -1030,8 +1030,8 @@
                                             <th>买家</th>
                                             <th>DC 数量</th>
                                             <th>未成交</th>
-                                            <th>价格 (MATIC/1000DC)</th>
-                                            <th>总价值 (MATIC)</th>
+                                            <th>价格 (POL/1000DC)</th>
+                                            <th>总价值 (POL)</th>
                                             <th>操作</th>
                                         </tr>
                                     </thead>
@@ -1653,7 +1653,7 @@
                     profileInfo.style.display = 'none';
                     // 清除市场页面数据
                     marketDcBalance.textContent = '0.00 DC';
-                    marketMaticBalance.textContent = '0.00 MATIC';
+                    marketMaticBalance.textContent = '0.00 POL';
                     pendingDC.textContent = '0';
                     pendingMATIC.textContent = '0';
                     askBody.innerHTML = '';
@@ -1745,7 +1745,7 @@
                     ]);
                     // 更新显示
                     marketDcBalance.textContent = `${parseFloat(ethers.utils.formatUnits(dcBalance, dcDecimals)).toFixed(2)} DC`;
-                    marketMaticBalance.textContent = `${parseFloat(ethers.utils.formatEther(maticBalance)).toFixed(4)} MATIC`;
+                    marketMaticBalance.textContent = `${parseFloat(ethers.utils.formatEther(maticBalance)).toFixed(4)} POL`;
                     pendingDC.textContent = parseFloat(ethers.utils.formatUnits(pendingDCBal, 2)).toFixed(2);
                     pendingMATIC.textContent = parseFloat(ethers.utils.formatEther(pendingMATICBal)).toFixed(4);
                     
@@ -1946,7 +1946,7 @@
                         myOrdersList.innerHTML = '<p>您没有挂单记录。</p>';
                         return;
                     }
-                    let html = '<table class="order-table"><thead><tr><th>订单ID</th><th>类型</th><th>总量</th><th>已成交</th><th>剩余</th><th>价格</th><th>总价值(MATIC)</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+                    let html = '<table class="order-table"><thead><tr><th>订单ID</th><th>类型</th><th>总量</th><th>已成交</th><th>剩余</th><th>价格</th><th>总价值(POL)</th><th>状态</th><th>操作</th></tr></thead><tbody>';
                     for (const id of userOrderIds) {
                         try {
                             const order = await marketContract.orders(id);
@@ -2075,7 +2075,7 @@
                         const maticRequired = dcAmountBase.div(UNIT_SIZE_DC).mul(priceBase);
                         const maticBalance = await window.provider.getBalance(window.userAddress);
                         if (maticBalance.lt(maticRequired)) {
-                            throw new Error('MATIC余额不足');
+                            throw new Error('POL余额不足');
                         }
                         // 存款MATIC到合约
                         const depositTx = await marketContract.depositMATIC({ value: maticRequired });
@@ -2121,7 +2121,7 @@
                         // 检查MATIC余额并存款
                         const maticBalance = await window.provider.getBalance(window.userAddress);
                         if (maticBalance.lt(maticRequired)) {
-                            throw new Error('MATIC余额不足');
+                            throw new Error('POL余额不足');
                         }
                         // 存款MATIC到合约
                         const depositTx = await marketContract.depositMATIC({ value: maticRequired });
